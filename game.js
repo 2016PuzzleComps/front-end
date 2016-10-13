@@ -1,13 +1,36 @@
-function Vehicle(length, x, y) {
-	this.length = lenght;
+function Board(length, width) {
+	this.length = length;
+	this.width = width;
+	this.vehicles = [];
+	this.vip = null;
+	this.exit = {
+		cardinal: null;
+		offset: 0;
+	}
+}
+Board.prototype.addVehicle = function(v) {
+	this.vehicles.push(v);
+}
+
+function Vehicle(length, horiz, x, y) {
+	this.horiz = horiz;
+	this.length = length;
 	this.x = x;
 	this.y = y;
 }
 Vehicle.prototype.moveForward = function() {
-	// TODO
+	if(this.horiz) {
+		this.x++;
+	} else {
+		this.y++;
+	}
 }
 Vehicle.prototype.moveBackward = function() {
-	// TODO
+	if(this.horiz) {
+		this.x--;
+	} else {
+		this.y--;
+	}
 }
 
 var canvas = document.getElementById("myCanvas");
