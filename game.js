@@ -29,9 +29,9 @@ function Vehicle(isVip, horiz, size, x, y) {
 function drawVehicle(vehicle) {
 	context.beginPath();
 	if(vehicle.horiz) {
-		context.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, vehicle.length * squareSize - 2, squareSize - 2);
+		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, vehicle.size * squareSize, squareSize);
 	} else {
-		context.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, squareSize - 2, vehicle.length * squareSize - 2);
+		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, squareSize, vehicle.size * squareSize);
 	}
 	if(vehicle.isVip) {
 		context.fillStyle = vipColor;
@@ -64,12 +64,6 @@ function drawFrame() {
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
-}
-
-function testFunction() {
-	var x = document.getElementById("myFile");
-	x.disabled = true;
-	importBoard(x.file);
 }
 
 var canvas = document.getElementById("gameCanvas");
