@@ -26,12 +26,48 @@ function Vehicle(isVip, horiz, size, x, y) {
 	this.y = y;
 }
 
+function handleFileSelect(evt) {
+	var files = evt.target.files; // FileList object
+
+	// files is a FileList of File objects. List some properties.
+	var output = [];
+	var file = files[0];
+	var reader = new FileReader();
+
+	// If we use onloadend, we need to check the readyState.
+	reader.onloadend = function(evt) {
+		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+			var lines = evt.target.result.split("\n");
+			var dimen = lines[0].split(" ");
+			var exitPos = lines[1].split(" ");
+			board = new Board(dimen[0], dimen[1],
+				new Exit(exitPos[0],exitPos[1]));
+			var isFirst = true;
+			for (var i=2; i<lines.length; i++) {
+				var items = lines[i].split(" ");
+				if (items.length != 4) {
+					break;
+				}
+				var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", items[2], items[0],items[1]);
+				board.vehicles.push(newVehicle);
+				if (isFirst) {
+					isFirst = false;
+				}
+			}
+			draw();
+			
+		}
+	};
+	reader.readAsText(file);
+}
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
 function drawVehicle(vehicle) {
 	context.beginPath();
 	if(vehicle.horiz) {
-		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, vehicle.size * squareSize, squareSize);
+		context.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, vehicle.length * squareSize - 2, squareSize - 2);
 	} else {
-		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, squareSize, vehicle.size * squareSize);
+		context.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, squareSize - 2, vehicle.length * squareSize - 2);
 	}
 	if(vehicle.isVip) {
 		context.fillStyle = vipColor;
@@ -64,6 +100,12 @@ function drawFrame() {
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
+}
+
+function testFunction() {
+	var x = document.getElementById("myFile");
+	x.disabled = true;
+	importBoard(x.file);
 }
 
 var canvas = document.getElementById("gameCanvas");
