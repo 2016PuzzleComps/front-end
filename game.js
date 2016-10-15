@@ -4,8 +4,8 @@ function Board(length, width) {
 	this.vehicles = [];
 	this.vip = null;
 	this.exit = {
-		cardinal: null;
-		offset: 0;
+		cardinal: null,
+		offset: 0
 	}
 }
 Board.prototype.addVehicle = function(v) {
