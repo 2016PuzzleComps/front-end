@@ -1,8 +1,11 @@
+var vehicleColor = '#0000FF'
+var vipColor = '#FF0000'
+var squareSize = 40
+
 function Board(length, width) {
 	this.length = length;
 	this.width = width;
 	this.vehicles = [];
-	this.vip = null;
 	this.exit = {
 		cardinal: null,
 		offset: 0
@@ -12,34 +15,33 @@ Board.prototype.addVehicle = function(v) {
 	this.vehicles.push(v);
 }
 
-function Vehicle(length, horiz, x, y) {
+function Vehicle(isVip, horiz, length, x, y) {
+	this.isVip = isVip;
 	this.horiz = horiz;
 	this.length = length;
 	this.x = x;
 	this.y = y;
 }
-Vehicle.prototype.moveForward = function() {
-	if(this.horiz) {
-		this.x++;
+
+function drawVehicle(vehicle) {
+	ctx.beginPath();
+	if(vehicle.horiz) {
+		ctx.rect(vehicle.x * squareSize, vehicle.y * squareSize, (vehicle.x + vehicle.length) * squareSize, (vehicle.y + 1) * squareSize);
 	} else {
-		this.y++;
+		ctx.rect(vehicle.x * squareSize, vehicle.y * squareSize, (vehicle.x + 1) * squareSize, (vehicle.y + vehicle.length) * squareSize);
 	}
-}
-Vehicle.prototype.moveBackward = function() {
-	if(this.horiz) {
-		this.x--;
+	if(vehicle.isVip) {
+		ctx.fillStyle = vehicleColor;
 	} else {
-		this.y--;
+		ctx.fillStyle = vipColor;
 	}
+	ctx.fill();
+	ctx.closePath();
 }
 
 var canvas = document.getElementById("gameCanvas");
 var ctx = canvas.getContext("2d");
 
-ctx.beginPath();
+var v = new Vehicle(false, true, 3, 0, 0);
+drawVehicle(v);
 
-ctx.rect(20,40,50,50);
-ctx.fillStyle="#FF0000";
-ctx.fill();
-
-ctx.closePath();
