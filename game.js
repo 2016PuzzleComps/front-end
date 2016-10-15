@@ -1,6 +1,7 @@
-var vehicleColor = '#0000FF'
-var vipColor = '#FF0000'
-var squareSize = 100
+var vehicleColor = '#0000FF';
+var vipColor = '#FF0000';
+var squareSize = 100;
+var board;
 
 function Board(width, height, exit) {
 	this.width = width;
@@ -54,8 +55,7 @@ function handleFileSelect(evt) {
 					isFirst = false;
 				}
 			}
-			draw();
-			
+			drawFrame();	
 		}
 	};
 	reader.readAsText(file);
@@ -100,12 +100,6 @@ function drawFrame() {
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
-}
-
-function testFunction() {
-	var x = document.getElementById("myFile");
-	x.disabled = true;
-	importBoard(x.file);
 }
 
 var canvas = document.getElementById("gameCanvas");
