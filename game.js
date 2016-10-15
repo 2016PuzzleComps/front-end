@@ -72,7 +72,7 @@ var context = canvas.getContext("2d");
 /* MOUSE EVENTS */
 
 // index of vehicle in board.vehicles that is selected by mouse 
-var selectedVehicle = null;
+var selectedVehicleIndex = null;
 var mouseOffset = 0;
 
 // get position of mouse at a mouse event
@@ -91,12 +91,12 @@ canvas.addEventListener('mousedown', function(e) {
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
 		if((v.horiz == true) && (v.x * squareSize <= mousePos.x) && (mousePos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= mousePos.y) && (mousePos.y <= (v.y + 1) * squareSize)) {
-			selectedVehicle = v;
+			selectedVehicleIndex = i;
 			mouseOffset = mousePos.x - (v.x * squareSize);
 			return;
 		}
 		if((v.horiz == false) && (v.x * squareSize <= mousePos.x) && (mousePos.x <= (v.x + 1) * squareSize) && (v.y * squareSize <= mousePos.y) && (mousePos.y <= (v.y + v.size) * squareSize)) {
-			selectedVehicle = v;
+			selectedVehicleIndex = i;
 			mouseOffset = mousePos.y - (v.y * squareSize);
 			return;
 		}
@@ -106,29 +106,51 @@ canvas.addEventListener('mousedown', function(e) {
 // mousemove
 canvas.addEventListener('mousemove', function(e) {
 	var mousePos = getMousePos(e);
-	if(selectedVehicle != null) {
+	if(selectedVehicleIndex != null) {
+		var selectedVehicle = board.vehicles[selectedVehicleIndex];
+		var blocked = false;
 		if(selectedVehicle.horiz) {
 			var newX = (mousePos.x - mouseOffset) / squareSize;
 			// see if anything is blocking
 			// first check walls
 			if(newX < 0) {
 				selectedVehicle.x = 0;
+				blocked = true;
 			} else if(newX + selectedVehicle.size > board.width) {
 				selectedVehicle.x = board.width - selectedVehicle.size;
+				blocked = true;
 			} else {
 				// then check vehicles
 				for(i in board.vehicles) {
-					var v = board.vehicles[i];
 					// skip selected vehicle
-					if(v == i) {
+					if(i == selectedVehicleIndex) {
 						continue;
 					}
-					if(v.horiz) {
+					var otherVehicle = board.vehicles[i];
+					// if other vehicle is horizontal or not
+					if(otherVehicle.horiz) {
+						if(otherVehicle.y == selectedVehicle.y) {
+							// which side of selected vehicle is other vehicle on
+							if(newX < otherVehicle.x && newX + selectedVehicle.size > otherVehicle.x && newX > selectedVehicle.x) {
+								selectedVehicle.x = otherVehicle.x - selectedVehicle.size;
+								blocked = true;
+								break;
+							} 
+							if(newX > otherVehicle.x && newX <= otherVehicle.x + otherVehicle.size && newX < selectedVehicle.x) {
+								selectedVehicle.x = otherVehicle.x + otherVehicle.size;
+								blocked = true;
+								break;
+							}
+						}
 					} else {
+						if(otherVehicle.x == selectedVehicle.x) {
+						}
 					}
 				}
-				// move vehicle
-				selectedVehicle.x = newX;
+				if(!blocked) {
+					// move vehicle
+					selectedVehicle.x = newX;
+				}
 			}
 		} else {
 			var newY = (mousePos.y - mouseOffset) / squareSize;
@@ -142,6 +164,7 @@ canvas.addEventListener('mousemove', function(e) {
 
 // mousedown
 canvas.addEventListener('mouseup', function(e) {
+	var selectedVehicle = board.vehicles[selectedVehicleIndex];
 	// snap selected vehicle to nearest spot
 	if(selectedVehicle.horiz) {
 		selectedVehicle.x = Math.round(selectedVehicle.x);
@@ -151,7 +174,7 @@ canvas.addEventListener('mouseup', function(e) {
 	// draw frame
 	drawFrame();
 	// deselect vehicle
-	selectedVehicle = null;
+	selectedVehicleIndex = null;
 });
 
 
@@ -160,6 +183,6 @@ canvas.addEventListener('mouseup', function(e) {
 var board = new Board(6, 6, new Exit('E', 2));
 
 board.addVehicle(new Vehicle(false, true, 3, 0, 0));
-board.addVehicle(new Vehicle(true, false, 2, 0, 2));
+board.addVehicle(new Vehicle(true, true, 2, 4, 0));
 
 drawFrame();
