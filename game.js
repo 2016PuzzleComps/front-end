@@ -26,12 +26,48 @@ function Vehicle(isVip, horiz, length, x, y) {
 	this.y = y;
 }
 
+function handleFileSelect(evt) {
+	var files = evt.target.files; // FileList object
+
+	// files is a FileList of File objects. List some properties.
+	var output = [];
+	var file = files[0];
+	var reader = new FileReader();
+
+	// If we use onloadend, we need to check the readyState.
+	reader.onloadend = function(evt) {
+		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+			var lines = evt.target.result.split("\n");
+			var dimen = lines[0].split(" ");
+			var exitPos = lines[1].split(" ");
+			board = new Board(dimen[0], dimen[1],
+				new Exit(exitPos[0],exitPos[1]));
+			var isFirst = true;
+			for (var i=2; i<lines.length; i++) {
+				var items = lines[i].split(" ");
+				if (items.length != 4) {
+					break;
+				}
+				var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", items[2], items[0],items[1]);
+				board.vehicles.push(newVehicle);
+				if (isFirst) {
+					isFirst = false;
+				}
+			}
+			draw();
+			
+		}
+	};
+	reader.readAsText(file);
+}
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
 function drawVehicle(vehicle) {
 	ctx.beginPath();
 	if(vehicle.horiz) {
-		ctx.rect(vehicle.x * squareSize, vehicle.y * squareSize, vehicle.length * squareSize, squareSize);
+		ctx.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, vehicle.length * squareSize - 2, squareSize - 2);
 	} else {
-		ctx.rect(vehicle.x * squareSize, vehicle.y * squareSize, squareSize, vehicle.length * squareSize);
+		ctx.rect(vehicle.x * squareSize + 1, vehicle.y * squareSize + 1, squareSize - 2, vehicle.length * squareSize - 2);
 	}
 	if(vehicle.isVip) {
 		ctx.fillStyle = vipColor;
@@ -64,12 +100,11 @@ function draw() {
 	}
 }
 
+function testFunction() {
+	var x = document.getElementById("myFile");
+	x.disabled = true;
+	importBoard(x.file);
+}
+
 var canvas = document.getElementById("gameCanvas");
 var ctx = canvas.getContext("2d");
-
-var board = new Board(6, 6, new Exit('E', 2));
-
-board.addVehicle(new Vehicle(false, true, 3, 0, 0));
-board.addVehicle(new Vehicle(true, false, 2, 0, 2));
-
-draw();
