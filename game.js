@@ -33,11 +33,13 @@ Vehicle.prototype.moveBackward = function() {
 	}
 }
 
-var canvas = document.getElementById("myCanvas");
+var canvas = document.getElementById("gameCanvas");
 var ctx = canvas.getContext("2d");
 
 ctx.beginPath();
 
-// game goes here
+ctx.rect(20,40,50,50);
+ctx.fillStyle="#FF0000";
+ctx.fill();
 
 ctx.closePath();
