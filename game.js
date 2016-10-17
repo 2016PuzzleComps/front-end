@@ -136,9 +136,26 @@ function drawFrame() {
 		context.stroke();
 	}
 	// clear exit
-	if(board.exit.cardinal == 'E') {
-		context.clearRect((board.width * squareSize) - 1, (board.exit.offset * squareSize) + 1, squareSize - 2, squareSize - 2);
+	var clearX, clearY;
+	var clearWidth = squareSize - 2;
+	var clearHeight = squareSize - 2;
+	if (board.exit.cardinal=='E' || board.exit.cardinal=='W') {
+		if (board.exit.cardinal=='E') {
+			clearX = (board.width * squareSize) - 1;
+		} else {
+			clearX = 0;
+			clearWidth = squareSize / 2;
+		}
+		clearY = board.exit.offset * squareSize + 1;
+	} else {
+		clearX = board.exit.offset * squareSize + 1;
+		if (board.exit.cardinal=='N') {
+			clearY = 0;
+		} else {
+			clearY = (board.height * squareSize) - 1;
+		}
 	}
+	context.clearRect(clearX, clearY, clearWidth, clearHeight);
 	// draw vehicles
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
