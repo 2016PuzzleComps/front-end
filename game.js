@@ -97,7 +97,7 @@ function handleFileSelect(evt) {
 					isFirst = false;
 				}
 			}
-			drawFrame();	
+			drawFrame();
 		}
 	};
 	reader.readAsText(file);
@@ -167,7 +167,7 @@ var context = canvas.getContext("2d");
 
 /* MOUSE EVENTS */
 
-// index of vehicle in board.vehicles that is selected by mouse 
+// index of vehicle in board.vehicles that is selected by mouse
 var selectedVehicleIndex = null;
 var mouseOffset = 0;
 var prevPos = {
@@ -206,7 +206,7 @@ function selectVehicle(pos) {
 	// find if pos is over a vehicle on the board
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
-		if(v.horiz) { 
+		if(v.horiz) {
 			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
 				selectedVehicleIndex = i;
 				mouseOffset = pos.x - (v.x * squareSize);
@@ -238,6 +238,7 @@ canvas.addEventListener('touchmove', function(evt) {
 
 function moveVehicle(pos) {
 	if(selectedVehicleIndex != null) {
+
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
@@ -255,6 +256,9 @@ function moveVehicle(pos) {
 				var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size;
 				if(newX + selectedVehicle.size >= testX && board.occupied[testX][selectedVehicle.y]) {
 					newX = testX - selectedVehicle.size;
+				}
+				if (selectedVehicle.isVip && newX > board.width) {
+					alert("You've won!");
 				}
 			}
 			// move vehicle horizontally
