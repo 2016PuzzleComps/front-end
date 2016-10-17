@@ -1,5 +1,5 @@
-var vehicleColor = '#0000FF';
-var vipColor = '#FF0000';
+var vehicleColor = '#306aad';
+var vipColor = '#b54141';
 var squareSize = 100;
 var board;
 
@@ -26,6 +26,17 @@ function Board(width, height, exit) {
 	for(var y = 0; y < this.height; y++) {
 		this.occupied[-1][y] = true;
 		this.occupied[this.width][y] = true;
+	}
+	// exit
+	if(this.exit.cardinal == 'E') {
+		this.occupied[this.width][this.exit.offset] = false;
+		var i = 0;
+		for(; i < 2; i++) {
+			this.occupied[this.width+i] = [];
+			this.occupied[this.width+i][this.exit.offset] = false;
+		}
+		this.occupied[this.width+i] = [];
+		this.occupied[this.width+i][this.exit.offset] = true;
 	}
 }
 
@@ -106,6 +117,7 @@ function drawVehicle(vehicle) {
 		context.fillStyle = vehicleColor;
 	}
 	context.fill();
+	context.stroke();
 	context.closePath();
 }
 
@@ -147,47 +159,71 @@ var prevPos = {
 }
 
 // get position of mouse at a mouse event
-function getMousePos(e) {
+function getMousePos(evt) {
 	var rect = canvas.getBoundingClientRect();
 	return {
-		x: e.clientX - rect.left,
-		y: e.clientY - rect.top
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
 	};
 }
 
-// mousedown
-canvas.addEventListener('mousedown', function(e) {
-	var mousePos = getMousePos(e);
-	// find if mouse is over a vehicle on the board
+// get position of finger at a touch event
+function getTouchPos(evt) {
+	var rect = canvas.getBoundingClientRect();
+	return {
+		x: evt.touches[0].clientX - rect.left,
+		y: evt.touches[0].clientY - rect.top
+	};
+}
+
+// select vehicle
+canvas.addEventListener('mousedown', function(evt) {
+	selectVehicle(getMousePos(evt));
+});
+canvas.addEventListener('touchstart', function(evt) {
+	selectVehicle(getTouchPos(evt));
+});
+
+
+function selectVehicle(pos) {
+	// find if pos is over a vehicle on the board
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
 		if(v.horiz) { 
-			if((v.x * squareSize <= mousePos.x) && (mousePos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= mousePos.y) && (mousePos.y <= (v.y + 1) * squareSize)) {
+			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
 				selectedVehicleIndex = i;
-				mouseOffset = mousePos.x - (v.x * squareSize);
+				mouseOffset = pos.x - (v.x * squareSize);
 				break;
 			}
 		} else {
-			if((v.x * squareSize <= mousePos.x) && (mousePos.x <= (v.x + 1) * squareSize) && (v.y * squareSize <= mousePos.y) && (mousePos.y <= (v.y + v.size) * squareSize)) {
+			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + 1) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + v.size) * squareSize)) {
 				selectedVehicleIndex = i;
-				mouseOffset = mousePos.y - (v.y * squareSize);
+				mouseOffset = pos.y - (v.y * squareSize);
 				break;
 			}
 		}
 	}
-	var selectedVehicle = board.vehicles[selectedVehicleIndex];
-	prevPos.x = selectedVehicle.x;
-	prevPos.y = selectedVehicle.y;
-	board.placeVehicle(selectedVehicle, false);
+	if(selectedVehicleIndex != null) {
+		var selectedVehicle = board.vehicles[selectedVehicleIndex];
+		prevPos.x = selectedVehicle.x;
+		prevPos.y = selectedVehicle.y;
+		board.placeVehicle(selectedVehicle, false);
+	}
+}
+
+// move vehicle
+canvas.addEventListener('mousemove', function(evt) {
+	moveVehicle(getMousePos(evt));
+});
+canvas.addEventListener('touchmove', function(evt) {
+	moveVehicle(getTouchPos(evt));
 });
 
-// mousemove
-canvas.addEventListener('mousemove', function(e) {
-	var mousePos = getMousePos(e);
+function moveVehicle(pos) {
 	if(selectedVehicleIndex != null) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
-			var newX = (mousePos.x - mouseOffset) / squareSize;
+			var newX = (pos.x - mouseOffset) / squareSize;
 			// check other vehicles
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
@@ -207,7 +243,7 @@ canvas.addEventListener('mousemove', function(e) {
 			// move vehicle horizontally
 			selectedVehicle.x = newX;
 		} else {
-			var newY = (mousePos.y - mouseOffset) / squareSize;
+			var newY = (pos.y - mouseOffset) / squareSize;
 			// check other vehicles
 			if(newY < selectedVehicle.y) {
 				// if it's being dragged up
@@ -229,10 +265,13 @@ canvas.addEventListener('mousemove', function(e) {
 		}
 		drawFrame();
 	}
-});
+}
 
-// mousedown
-canvas.addEventListener('mouseup', function(e) {
+// deselect vehicle
+canvas.addEventListener('mouseup', deselectVehicle);
+canvas.addEventListener('mouseleave', deselectVehicle);
+canvas.addEventListener('touchend', deselectVehicle);
+function deselectVehicle(evt) {
 	if(selectedVehicleIndex) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		// snap selected vehicle to nearest spot
@@ -247,5 +286,21 @@ canvas.addEventListener('mouseup', function(e) {
 		// deselect vehicle
 		selectedVehicleIndex = null;
 	}
-});
+}
 
+// prevent touch scrolling
+document.body.addEventListener("touchstart", function (e) {
+	if (e.target == canvas) {
+		e.preventDefault();
+	}
+}, false);
+document.body.addEventListener("touchend", function (e) {
+	if (e.target == canvas) {
+		e.preventDefault();
+	}
+}, false);
+document.body.addEventListener("touchmove", function (e) {
+	if (e.target == canvas) {
+		e.preventDefault();
+	}
+}, false);
