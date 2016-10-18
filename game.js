@@ -257,9 +257,6 @@ function moveVehicle(pos) {
 				if(newX + selectedVehicle.size >= testX && board.occupied[testX][selectedVehicle.y]) {
 					newX = testX - selectedVehicle.size;
 				}
-				if (selectedVehicle.isVip && newX > board.width) {
-					alert("You've won!");
-				}
 			}
 			// move vehicle horizontally
 			selectedVehicle.x = newX;
@@ -304,6 +301,16 @@ function deselectVehicle(evt) {
 		board.placeVehicle(selectedVehicle, true);
 		// draw frame
 		drawFrame();
+
+		// check for victory
+		if(selectedVehicle.isVip) {
+		   	if(board.exit.cardinal == 'E' && selectedVehicle.x >= board.width
+				|| board.exit.cardinal == 'W' && selectedVehicle.x <= 0
+				|| board.exit.cardinal == 'N' && selectedVehicle.y <= 0
+				|| board.exit.cardinal == 'S' && selectedVehicle.y >= board.height) {
+				alert("You've won!");
+			}
+		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
 	}
