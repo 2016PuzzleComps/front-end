@@ -8,7 +8,6 @@ function Board(width, height, exit_offset) {
 	this.width = width;
 	this.height = height;
 	this.vehicles = [];
-	// exit
 	this.exit_offset = exit_offset;
 	// create 2d array of false
 	this.occupied = [];
@@ -29,6 +28,7 @@ function Board(width, height, exit_offset) {
 		this.occupied[-1][y] = true;
 		this.occupied[this.width][y] = true;
 	}
+	// exit
 	this.occupied[this.width][this.exit_offset] = false;
 	var i = 1;
 	for(; i <= 1; i++) { // for now just assume the vip car has size 2
@@ -87,8 +87,8 @@ function loadBoardFromText(text) {
 	initialBoard = text;
 	var lines = text.split("\n");
 	var dimen = lines[0].split(" ");
-	var exitPos = lines[1].split(" ");
-	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), parseInt(exitPos[1]));
+	var exitOffset = parseInt(lines[1]);
+	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
 	var isFirst = true;
 	for (var i=2; i<lines.length; i++) {
 		var items = lines[i].split(" ");
@@ -196,6 +196,10 @@ canvas.addEventListener('touchstart', function(evt) {
 
 
 function selectVehicle(pos) {
+	// if puzzle is loaded
+	if(!board) {
+		return;
+	}
 	// find if pos is over a vehicle on the board
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
@@ -231,7 +235,6 @@ canvas.addEventListener('touchmove', function(evt) {
 
 function moveVehicle(pos) {
 	if(selectedVehicleIndex != null) {
-
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
