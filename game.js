@@ -2,6 +2,7 @@ var vehicleColor = '#306aad';
 var vipColor = '#b54141';
 var squareSize = 100;
 var board;
+var initialBoard = "";
 
 function Board(width, height, exit) {
 	this.width = width;
@@ -70,6 +71,7 @@ function Vehicle(isVip, horiz, size, x, y) {
 	this.y = y;
 }
 
+// Handles a user uploading a file
 function handleFileSelect(evt) {
 	var files = evt.target.files; // FileList object
 
@@ -81,28 +83,41 @@ function handleFileSelect(evt) {
 	// If we use onloadend, we need to check the readyState.
 	reader.onloadend = function(evt) {
 		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-			var lines = evt.target.result.split("\n");
-			var dimen = lines[0].split(" ");
-			var exitPos = lines[1].split(" ");
-			board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), new Exit(exitPos[0], parseInt(exitPos[1])));
-			var isFirst = true;
-			for (var i=2; i<lines.length; i++) {
-				var items = lines[i].split(" ");
-				if (items.length != 4) {
-					break;
-				}
-				var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
-				board.addVehicle(newVehicle);
-				if (isFirst) {
-					isFirst = false;
-				}
-			}
-			drawFrame();
+			loadBoardFromText(evt.target.result);
 		}
 	};
 	reader.readAsText(file);
 }
-document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+// Loads a board from a given block of text
+function loadBoardFromText(text) {
+	initialBoard = text;
+	var lines = text.split("\n");
+	var dimen = lines[0].split(" ");
+	var exitPos = lines[1].split(" ");
+	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), new Exit(exitPos[0], parseInt(exitPos[1])));
+	var isFirst = true;
+	for (var i=2; i<lines.length; i++) {
+		var items = lines[i].split(" ");
+		if (items.length != 4) {
+			break;
+		}
+		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
+		board.addVehicle(newVehicle);
+		if (isFirst) {
+			isFirst = false;
+		}
+	}
+	drawFrame();
+}
+
+// Resets the board to the initial state (if there is one)
+function resetBoard() {
+	if (initialBoard != "") {
+		//board.prototype = null;
+		loadBoardFromText(initialBoard);
+	}
+}
 
 function drawVehicle(vehicle) {
 	context.beginPath();
@@ -332,3 +347,6 @@ document.body.addEventListener("touchmove", function (e) {
 		e.preventDefault();
 	}
 }, false);
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+document.getElementById('resetButton').onclick = function() { resetBoard(); };
