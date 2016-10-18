@@ -31,7 +31,7 @@ function Board(width, height, exit) {
 	if(this.exit.cardinal == 'E') {
 		this.occupied[this.width][this.exit.offset] = false;
 		var i = 1;
-		for(; i <= 2; i++) { // for now just assume the vip car has size 2
+		for(; i <= 1; i++) { // for now just assume the vip car has size 2
 			this.occupied[this.width+i] = [];
 			this.occupied[this.width+i][this.exit.offset] = false;
 		}
