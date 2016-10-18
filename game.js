@@ -114,7 +114,7 @@ function loadBoardFromText(text) {
 // Resets the board to the initial state (if there is one)
 function resetBoard() {
 	if (initialBoard != "") {
-		//board.prototype = null;
+		board.prototype = null;
 		loadBoardFromText(initialBoard);
 	}
 }
