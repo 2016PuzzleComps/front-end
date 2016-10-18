@@ -4,11 +4,12 @@ var squareSize = 100;
 var board;
 var initialBoard = "";
 
-function Board(width, height, exit) {
+function Board(width, height, exit_offset) {
 	this.width = width;
 	this.height = height;
 	this.vehicles = [];
-	this.exit = exit;
+	// exit
+	this.exit_offset = exit_offset;
 	// create 2d array of false
 	this.occupied = [];
 	for(var x = 0; x < this.width; x++) {
@@ -28,22 +29,14 @@ function Board(width, height, exit) {
 		this.occupied[-1][y] = true;
 		this.occupied[this.width][y] = true;
 	}
-	// exit
-	if(this.exit.cardinal == 'E') {
-		this.occupied[this.width][this.exit.offset] = false;
-		var i = 1;
-		for(; i <= 1; i++) { // for now just assume the vip car has size 2
-			this.occupied[this.width+i] = [];
-			this.occupied[this.width+i][this.exit.offset] = false;
-		}
+	this.occupied[this.width][this.exit_offset] = false;
+	var i = 1;
+	for(; i <= 1; i++) { // for now just assume the vip car has size 2
 		this.occupied[this.width+i] = [];
-		this.occupied[this.width+i][this.exit.offset] = true;
+		this.occupied[this.width+i][this.exit_offset] = false;
 	}
-}
-
-function Exit(cardinal, offset) {
-	this.cardinal = cardinal;
-	this.offset = offset;
+	this.occupied[this.width+i] = [];
+	this.occupied[this.width+i][this.exit_offset] = true;
 }
 
 Board.prototype.addVehicle = function(v) {
@@ -95,7 +88,7 @@ function loadBoardFromText(text) {
 	var lines = text.split("\n");
 	var dimen = lines[0].split(" ");
 	var exitPos = lines[1].split(" ");
-	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), new Exit(exitPos[0], parseInt(exitPos[1])));
+	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), parseInt(exitPos[1]));
 	var isFirst = true;
 	for (var i=2; i<lines.length; i++) {
 		var items = lines[i].split(" ");
@@ -153,22 +146,8 @@ function drawFrame() {
 	var clearX, clearY;
 	var clearWidth = squareSize - 2;
 	var clearHeight = squareSize - 2;
-	if (board.exit.cardinal=='E' || board.exit.cardinal=='W') {
-		if (board.exit.cardinal=='E') {
-			clearX = (board.width * squareSize) - 1;
-		} else {
-			clearX = 0;
-			clearWidth = squareSize / 2;
-		}
-		clearY = board.exit.offset * squareSize + 1;
-	} else {
-		clearX = board.exit.offset * squareSize + 1;
-		if (board.exit.cardinal=='N') {
-			clearY = 0;
-		} else {
-			clearY = (board.height * squareSize) - 1;
-		}
-	}
+	clearX = (board.width * squareSize) - 1;
+	clearY = board.exit_offset * squareSize + 1;
 	context.clearRect(clearX, clearY, clearWidth, clearHeight);
 	// draw vehicles
 	for(i in board.vehicles) {
@@ -315,15 +294,9 @@ function deselectVehicle(evt) {
 		board.placeVehicle(selectedVehicle, true);
 		// draw frame
 		drawFrame();
-
 		// check for victory
-		if(selectedVehicle.isVip) {
-		   	if(board.exit.cardinal == 'E' && selectedVehicle.x >= board.width
-				|| board.exit.cardinal == 'W' && selectedVehicle.x <= 0
-				|| board.exit.cardinal == 'N' && selectedVehicle.y <= 0
-				|| board.exit.cardinal == 'S' && selectedVehicle.y >= board.height) {
-				alert("You've won!");
-			}
+		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
+			alert("You've won!");
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
