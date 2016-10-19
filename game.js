@@ -300,13 +300,20 @@ function deselectVehicle(evt) {
 		board.placeVehicle(selectedVehicle, true);
 		// draw frame
 		drawFrame();
-		// check for victory
+		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
-			alert("You've won!");
+			var code = generateCode();
+			document.getElementById("code").innerHTML = "Puzzle Code: " + code;
+			alert("You've won! ");
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
 	}
+}
+
+// Generates a code that the worker will user to recieve payment on MTurk
+function generateCode() {
+	return 34;
 }
 
 // prevent touch scrolling
