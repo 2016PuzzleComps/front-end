@@ -348,3 +348,12 @@ document.body.addEventListener("touchmove", function (e) {
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('resetButton').onclick = resetBoard;
+
+// LOAD A PUZZLE!
+var requester = new XMLHttpRequest();
+requester.addEventListener('load', function() {
+	console.log(this.responseText);
+	loadBoardFromText(this.responseText);
+});
+requester.open("GET", "http://137.22.232.73/puzzle-file");
+requester.send();
