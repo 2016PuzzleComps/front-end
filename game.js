@@ -160,7 +160,7 @@ var context = canvas.getContext("2d");
 
 /* MOUSE/TOUCH EVENTS */
 
-var fingersDown = 0;
+var fingerDown = false;
 
 // index of vehicle in board.vehicles that is selected by mouse
 var selectedVehicleIndex = null;
@@ -195,31 +195,33 @@ canvas.addEventListener('mousedown', function(evt) {
 	selectVehicle(getMousePos(evt));
 });
 canvas.addEventListener('touchstart', function(evt) {
-	if(fingersDown == 0) {
+	if(evt.changedTouches[0].identifier == 0) {
 		selectVehicle(getTouchPos(evt));
 	}
-	fingersDown++;
+	fingerDown = true;
 });
 
 // deselect vehicle
 canvas.addEventListener('mouseup', deselectVehicle);
 canvas.addEventListener('mouseleave', deselectVehicle);
 canvas.addEventListener('touchleave', deselectVehicle);
-canvas.addEventListener('touchend', function() {
-	if(fingersDown == 1) {
+canvas.addEventListener('touchend', function(evt) {
+	if(evt.changedTouches[0].identifier == 0) {
 		deselectVehicle();
+		fingerDown = false;
 	}
-	fingersDown--;
 });
 
 // move vehicle
 canvas.addEventListener('mousemove', function(evt) {
-	if(fingersDown == 0) {
+	if(!fingerDown) {
 		moveVehicle(getMousePos(evt));
 	}
 });
 canvas.addEventListener('touchmove', function(evt) {
-	moveVehicle(getTouchPos(evt));
+	if(evt.changedTouches[0].identifier == 0) {
+		moveVehicle(getTouchPos(evt));
+	}
 });
 
 function selectVehicle(pos) {
