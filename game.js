@@ -238,17 +238,20 @@ function moveVehicle(pos) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
+			// check for cheating
+			if(Math.abs(newX - selectedVehicle.x) > 1) {
+				return;
+				console.log("cheater!");
+			}
 			// check other vehicles
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
-				// see if next square over is occupied
 				var testX = Math.floor(selectedVehicle.x) - 1;
 				if(newX - 1 <= testX && board.occupied[testX][selectedVehicle.y]) {
 					newX = testX + 1;
 				}
 			} else {
 				// if it's being dragged to the right
-				// see if next square over is occupied
 				var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size;
 				if(newX + selectedVehicle.size >= testX && board.occupied[testX][selectedVehicle.y]) {
 					newX = testX - selectedVehicle.size;
