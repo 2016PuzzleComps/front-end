@@ -158,11 +158,15 @@ function drawFrame() {
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
 
-/* MOUSE EVENTS */
+/* MOUSE/TOUCH EVENTS */
+
+var fingersDown = 0;
 
 // index of vehicle in board.vehicles that is selected by mouse
 var selectedVehicleIndex = null;
+// offset from origin of selected vehicle
 var mouseOffset = 0;
+// previous position of selected vehicle
 var prevPos = {
 	x: 0,
 	y: 0
@@ -191,9 +195,32 @@ canvas.addEventListener('mousedown', function(evt) {
 	selectVehicle(getMousePos(evt));
 });
 canvas.addEventListener('touchstart', function(evt) {
-	selectVehicle(getTouchPos(evt));
+	if(fingersDown == 0) {
+		selectVehicle(getTouchPos(evt));
+	}
+	fingersDown++;
 });
 
+// deselect vehicle
+canvas.addEventListener('mouseup', deselectVehicle);
+canvas.addEventListener('mouseleave', deselectVehicle);
+canvas.addEventListener('touchleave', deselectVehicle);
+canvas.addEventListener('touchend', function() {
+	if(fingersDown == 1) {
+		deselectVehicle();
+	}
+	fingersDown--;
+});
+
+// move vehicle
+canvas.addEventListener('mousemove', function(evt) {
+	if(fingersDown == 0) {
+		moveVehicle(getMousePos(evt));
+	}
+});
+canvas.addEventListener('touchmove', function(evt) {
+	moveVehicle(getTouchPos(evt));
+});
 
 function selectVehicle(pos) {
 	// if puzzle is loaded
@@ -225,24 +252,11 @@ function selectVehicle(pos) {
 	}
 }
 
-// move vehicle
-canvas.addEventListener('mousemove', function(evt) {
-	moveVehicle(getMousePos(evt));
-});
-canvas.addEventListener('touchmove', function(evt) {
-	moveVehicle(getTouchPos(evt));
-});
-
 function moveVehicle(pos) {
 	if(selectedVehicleIndex != null) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
-			// check for cheating
-			if(Math.abs(newX - selectedVehicle.x) > 1) {
-				return;
-				console.log("cheater!");
-			}
 			// check other vehicles
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
@@ -284,10 +298,6 @@ function moveVehicle(pos) {
 	}
 }
 
-// deselect vehicle
-canvas.addEventListener('mouseup', deselectVehicle);
-canvas.addEventListener('mouseleave', deselectVehicle);
-canvas.addEventListener('touchend', deselectVehicle);
 function deselectVehicle(evt) {
 	if(selectedVehicleIndex) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
@@ -327,4 +337,4 @@ document.body.addEventListener("touchmove", function (e) {
 }, false);
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
-document.getElementById('resetButton').onclick = function() { resetBoard(); };
+document.getElementById('resetButton').onclick = resetBoard;
