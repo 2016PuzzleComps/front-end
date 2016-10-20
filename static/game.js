@@ -1,4 +1,4 @@
-var puzzleServerURL = 'localhost'
+var puzzleServerURL = 'localhost:5000'
  
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
