@@ -89,10 +89,10 @@ function loadBoardFromText(text) {
 	initialBoard = text;
 	var lines = text.split("\n");
 	var dimen = lines[0].split(" ");
-	var exitOffset = parseInt(lines[1]);
+	var exitOffset = parseInt(lines[1].split(" ")[1]);
 	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
 	var isFirst = true;
-	for (var i=2; i<lines.length; i++) {
+	for (var i=1; i<lines.length; i++) {
 		var items = lines[i].split(" ");
 		if (items.length != 4) {
 			break;
