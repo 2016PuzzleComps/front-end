@@ -141,6 +141,8 @@ function undoMove() {
 	if (moveList.length > 0) {
 		var lastMove = moveList.pop();
 		var currentPos;
+		// remove the vehicle from the prototype
+		board.placeVehicle(lastMove.vehicle, false);
 		if (lastMove.vehicle.horiz) {
 			currentPos = lastMove.vehicle.x;
 		} else {
