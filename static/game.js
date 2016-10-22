@@ -5,6 +5,9 @@ var vipColor = '#b54141';
 var squareSize = 100;
 var board;
 var initialBoard = "";
+var log="";
+var moveList = [];
+var currentMove;
 
 function Board(width, height, exit_offset) {
 	this.width = width;
@@ -66,6 +69,13 @@ function Vehicle(isVip, horiz, size, x, y) {
 	this.y = y;
 }
 
+// Stores the information in a move
+function Move(vehicle, ipos, fpos) {
+	this.vehicle = vehicle;
+	this.ipos = ipos;
+	this.fpos = fpos;
+}
+
 // Handles a user uploading a file
 function handleFileSelect(evt) {
 	var files = evt.target.files; // FileList object
@@ -110,7 +120,54 @@ function loadBoardFromText(text) {
 function resetBoard() {
 	if (initialBoard != "") {
 		loadBoardFromText(initialBoard);
+		// clear most recent moves and log the board reset
+		moveList = [];
+		logMove("R");
 	}
+}
+
+// undoes the last move
+function undoMove() {
+	if (moveList.length > 0) {
+		var lastMove = moveList.pop();
+		var currentPos;
+		if (lastMove.vehicle.horiz) {
+			currentPos = lastMove.vehicle.x;
+		} else {
+			currentPos = lastMove.vehicle.y;
+		}
+		moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
+		logMove("U");
+	}
+}
+
+// saves a move to the movelist and log
+function saveMove(selectedVehicleIndex, move) {
+	var selectedVehicle = board.vehicles[selectedVehicleIndex];
+
+	// save to the currentMove
+	if (selectedVehicle.horiz) {
+		currentMove.fpos = selectedVehicle.x;
+	} else {
+		currentMove.fpos = selectedVehicle.y;
+	}
+	if (currentMove.ipos != currentMove.fpos) {
+		moveList.push(currentMove);
+	}
+	// if there was a move, record it in the recent moves
+	// and in the log
+	var logLine = selectedVehicleIndex + " ";
+	if (currentMove.ipos != currentMove.fpos) {
+		logLine += currentMove.fpos - currentMove.ipos;
+	} else {
+		return;
+	}
+	logMove(logLine);
+}
+
+// saves a move to the log with a timestamp
+function logMove(moveString) {
+	log += Date.now() + " " + moveString + "\n";
 }
 
 function drawVehicle(vehicle) {
@@ -168,11 +225,6 @@ var fingerDown = false;
 var selectedVehicleIndex = null;
 // offset from origin of selected vehicle
 var mouseOffset = 0;
-// previous position of selected vehicle
-var prevPos = {
-	x: 0,
-	y: 0
-}
 
 // get position of mouse at a mouse event
 function getMousePos(evt) {
@@ -226,6 +278,18 @@ canvas.addEventListener('touchmove', function(evt) {
 	}
 });
 
+// moves a vehicle to the given position
+function moveVehicleTo(vehicle, pos) {
+	if (vehicle.horiz) {
+		vehicle.x = pos;
+	} else {
+		vehicle.y = pos;
+	}
+	// place the vehicle in the prototype
+	board.placeVehicle(vehicle, true);
+	drawFrame();
+}
+
 function selectVehicle(pos) {
 	// if puzzle is loaded
 	if(!board) {
@@ -250,8 +314,13 @@ function selectVehicle(pos) {
 	}
 	if(selectedVehicleIndex != null) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
-		prevPos.x = selectedVehicle.x;
-		prevPos.y = selectedVehicle.y;
+		var pos;
+		if (selectedVehicle.horiz) {
+			pos = selectedVehicle.x;
+		} else {
+			pos = selectedVehicle.y;
+		}
+		currentMove = new Move(selectedVehicle, pos, pos);
 		board.placeVehicle(selectedVehicle, false);
 	}
 }
@@ -306,14 +375,15 @@ function deselectVehicle(evt) {
 	if(selectedVehicleIndex) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		// snap selected vehicle to nearest spot
+		var pos;
 		if(selectedVehicle.horiz) {
-			selectedVehicle.x = Math.round(selectedVehicle.x);
+			pos = Math.round(selectedVehicle.x);
 		} else {
-			selectedVehicle.y = Math.round(selectedVehicle.y);
+			pos = Math.round(selectedVehicle.y);
 		}
-		board.placeVehicle(selectedVehicle, true);
-		// draw frame
-		drawFrame();
+		moveVehicleTo(selectedVehicle, pos);
+		saveMove(selectedVehicleIndex, currentMove);
+		// draw frame, twice to avoid rendering bugs
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
@@ -350,6 +420,7 @@ document.body.addEventListener("touchmove", function (e) {
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('resetButton').onclick = resetBoard;
+document.getElementById('undoButton').onclick = undoMove;
 
 // LOAD A PUZZLE!
 var requester = new XMLHttpRequest();

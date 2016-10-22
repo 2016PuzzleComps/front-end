@@ -6,6 +6,7 @@
 <body>
 	<input type="file" id="files" name="files[]" multiple />
 	<button type="button" id="resetButton">Reset</button>
+	<button type="button" id="undoButton">Undo</button>
 	<p id="code"> Puzzle Code: </p>
 	<canvas id="gameCanvas" width="1920" height="1080"> </canvas>
 	<script src="{{ url_for('static', filename='game.js') }}"></script>
