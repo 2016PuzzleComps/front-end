@@ -1,6 +1,7 @@
 import sys
 import flask
 import psycopg2
+import json
 
 app = flask.Flask(__name__)
 
@@ -8,30 +9,37 @@ app = flask.Flask(__name__)
 def get_index():
     return flask.render_template('index.html')
 
+# compute a unique identifier for a solve
+def compute_solve_id(puzzle_id):
+    pass
+
+# get ID of a puzzle with fewest logs in DB
+def get_next_puzzle_id():
+    return 1 # (for now just load puzzle1.txt)
+
+# load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
+    if puzzle_id == 1:
+        return open('puzzle1.txt').read()
+
+# load a solve log file into the DB
+def add_log_file_to_database(solve_id, log_file):
     pass #TODO
 
-def add_log_file_to_database(puzzle_id, log_file):
-    pass #TODO
-
-# store new log file for given puzzle ID in database
-@app.route('/log-file', methods=['PUT'])
-def put_log_file():
-    puzzle_id = flask.args['id']
-    pass #TODO
-
-# get a puzzle to solve, determined by which 
-# puzzles have the fewest logs in the database
-# (or by puzzle id, if given in URL args)
+# serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
 def get_puzzle_file():
-    # for now just load puzzle1.txt
-    return open('puzzle1.txt').read()
-    if 'id' in flask.args['id']:
-        puzzle_id = flask.args['id']
-    else:
-        pass #TODO
-    return get_puzzle_file_from_database(puzzle_id)
+    puzzle_id = get_next_puzzle_id()
+    puzzle_file = get_puzzle_file_from_database(puzzle_id)
+    solve_id = compute_solve_id(puzzle_id)
+    response = {'solve_id': solve_id, 'puzzle_file': puzzle_file}
+    return json.dumps(response)
+
+# receive new solve log file from client
+@app.route('/log-file', methods=['POST'])
+def put_log_file():
+    print(request)
+    pass #TODO
 
 host = sys.argv[1]
 port = sys.argv[2]

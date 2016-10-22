@@ -3,11 +3,21 @@ var puzzleServerURL = 'localhost:5000'
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
 var squareSize = 100;
+
 var board;
 var initialBoard = "";
 var log="";
 var moveList = [];
 var currentMove;
+
+var solveID;
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+document.getElementById('resetButton').onclick = resetBoard;
+document.getElementById('undoButton').onclick = undoMove;
+
+var canvas = document.getElementById("gameCanvas");
+var context = canvas.getContext("2d");
 
 function Board(width, height, exit_offset) {
 	this.width = width;
@@ -214,9 +224,6 @@ function drawFrame() {
 	}
 }
 
-var canvas = document.getElementById("gameCanvas");
-var context = canvas.getContext("2d");
-
 /* MOUSE/TOUCH EVENTS */
 
 var fingerDown = false;
@@ -388,17 +395,12 @@ function deselectVehicle(evt) {
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
 			var code = generateCode();
-			document.getElementById("code").innerHTML = "Puzzle Code: " + code;
 			alert("You've won! ");
+			submitLog();
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
 	}
-}
-
-// Generates a code that the worker will user to recieve payment on MTurk
-function generateCode() {
-	return 34;
 }
 
 // prevent touch scrolling
@@ -418,14 +420,32 @@ document.body.addEventListener("touchmove", function (e) {
 	}
 }, false);
 
-document.getElementById('files').addEventListener('change', handleFileSelect, false);
-document.getElementById('resetButton').onclick = resetBoard;
-document.getElementById('undoButton').onclick = undoMove;
+// receive puzzle from server
+function getPuzzleFile() {
+	var requester = new XMLHttpRequest();
+	requester.addEventListener('load', function() {
+		resp = JSON.parse(this.responseText);
+		solveID = resp.solve_id;
+		loadBoardFromText(resp.puzzle_file);
+	});
+	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
+	requester.send(null);
+}
 
-// LOAD A PUZZLE!
-var requester = new XMLHttpRequest();
-requester.addEventListener('load', function() {
-	loadBoardFromText(this.responseText);
-});
-requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
-requester.send();
+// submit solve log to server
+function submitLog() {
+	var req = new XMLHttpRequest();
+	req.addEventListener('load', function() {
+		var resp = JSON.parse(this.responseText);
+		MTurkToken = resp.mturk_token;
+		document.getElementById("code").innerHTML = "Solution Code: " + MTurkToken;
+	});
+	req.open("POST", "http://" + puzzleServerURL + "/log-file");
+	var msg = {
+		solve_id: solveID,
+		log_file: log
+	};
+	req.send(JSON.stringify(msg));
+}
+
+getPuzzleFile();
