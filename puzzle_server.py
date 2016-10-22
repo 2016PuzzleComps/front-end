@@ -9,6 +9,10 @@ app = flask.Flask(__name__)
 def get_index():
     return flask.render_template('index.html')
 
+# compute the MTurk Token for a solve
+def compute_mturk_token(solve_id):
+    return "1337"
+
 # compute a unique identifier for a solve
 def compute_solve_id(puzzle_id):
     pass
@@ -38,8 +42,13 @@ def get_puzzle_file():
 # receive new solve log file from client
 @app.route('/log-file', methods=['POST'])
 def put_log_file():
-    print(request)
-    pass #TODO
+    request = json.loads(flask.request.data.decode('utf-8'))
+    solve_id = request['solve_id']
+    log_file = request['log_file']
+    print(log_file)
+    add_log_file_to_database(solve_id, log_file)
+    response = {'mturk_token': compute_mturk_token(solve_id)}
+    return json.dumps(response)
 
 host = sys.argv[1]
 port = sys.argv[2]

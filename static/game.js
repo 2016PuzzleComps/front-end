@@ -396,7 +396,6 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
-			var code = generateCode();
 			alert("You've won! ");
 			submitLog();
 		}
