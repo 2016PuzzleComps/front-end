@@ -19,7 +19,7 @@ def compute_mturk_token(solve_id):
 
 # compute a unique identifier for a solve
 def compute_solve_id(puzzle_id):
-    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %i;', (puzzle_id))
+    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %i', (puzzle_id))
     rows = fetch_all_rows_for_query(query)
     num_solves = rows[0][0]
     m = hashlib.md5()
@@ -29,7 +29,7 @@ def compute_solve_id(puzzle_id):
 
 # get ID of a puzzle with fewest or tied for fewest logs in DB
 def get_next_puzzle_id():
-    query = ('SELECT s.puzzle_id as puzzle_id, s.count as num_solves FROM (SELECT puzzle_id, count(solve_id) FROM solve_info GROUP BY puzzle_id) as s WHERE s.count in (SELECT min(t.count) FROM (SELECT count(solve_id) FROM solve_info GROUP BY puzzle_id) as t);', ())
+    query = ('select puzzle_id from puzzles_by_id where num_solves in (select min(num_solves) from puzzles_by_id )', ())
     rows = fetch_all_rows_for_query(query)
     if not rows:
         return None # TODO: deal with this better
@@ -40,7 +40,7 @@ def get_next_puzzle_id():
 def get_puzzle_file_from_database(puzzle_id):
     query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %i;', (puzzle_id))
     rows = fetch_all_rows_for_query(query)
-    puzzle_file = rows[0][0]
+    puzzle_file = rows[0][1]
     return puzzle_file
 
 # load a solve log file into the DB
@@ -51,6 +51,8 @@ def add_log_file_to_database(solve_id, log_file):
         split = line.split(' ')
         timestamp = split[0]
         move = ' '.join(split[1:])
+        query = ('update puzzles_by_id set num_solves = (num_solves + 1) where puzzle_id in (select puzzle_id from solve_info where solve_id = %i)', (solve_id))
+        fetch_all_rows_for_query(query)
         query = ('INSERT INTO solve_logs values(%i, %i, %s, %s)', (solve_id, move_num, timestamp, move))
         fetch_all_rows_for_query(query)
 
