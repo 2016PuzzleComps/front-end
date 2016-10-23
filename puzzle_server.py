@@ -51,10 +51,12 @@ def add_log_file_to_database(solve_id, log_file):
         split = line.split(' ')
         timestamp = split[0]
         move = ' '.join(split[1:])
-        query = ('update puzzles_by_id set num_solves = (num_solves + 1) where puzzle_id in (select puzzle_id from solve_info where solve_id = %i)', (solve_id))
-        fetch_all_rows_for_query(query)
         query = ('INSERT INTO solve_logs values(%i, %i, %s, %s)', (solve_id, move_num, timestamp, move))
         fetch_all_rows_for_query(query)
+
+    # increments num_solve for the puzzle_id
+    query = ('update puzzles_by_id set num_solves = (num_solves + 1) where puzzle_id in (select puzzle_id from solve_info where solve_id = %i)', (solve_id))
+    fetch_all_rows_for_query(query)
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
