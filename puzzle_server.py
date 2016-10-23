@@ -2,6 +2,7 @@ import sys
 import flask
 import psycopg2
 import json
+import config
 
 app = flask.Flask(__name__)
 
@@ -50,7 +51,27 @@ def put_log_file():
     response = {'mturk_token': compute_mturk_token(solve_id)}
     return json.dumps(response)
 
-host = sys.argv[1]
-port = sys.argv[2]
-app.run(host=host, port=port)
 
+# Returns a list of rows obtained from the database by the specified SQL query.
+# If the query fails for any reason, an empty list is returned.
+def fetch_all_rows_for_query(query):
+    rows = []
+    try:
+        cursor.execute(query[0], query[1])
+        rows = cursor.fetchall()
+    except Exception as e:
+        raise e
+    return rows
+
+
+if __name__ == '__main__':
+    try:
+        connection = psycopg2.connect(database=config.database, user=config.user, password=config.password)
+        cursor = connection.cursor()
+    except Exception as e:
+        try_print(e)
+        exit(1)
+    host = sys.argv[1]
+    port = sys.argv[2]
+    app.run(host=host, port=port)
+    connection.close()

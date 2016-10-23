@@ -1,5 +1,5 @@
 var puzzleServerURL = 'localhost:5000'
- 
+
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
 var squareSize = 100;
@@ -438,6 +438,8 @@ function submitLog() {
 	var req = new XMLHttpRequest();
 	req.addEventListener('load', function() {
 		var resp = JSON.parse(this.responseText);
+    
+    // Display to the user the token for input into MTurk
 		MTurkToken = resp.mturk_token;
 		document.getElementById("code").innerHTML = "Solution Code: " + MTurkToken;
 	});
