@@ -18,7 +18,7 @@ def compute_mturk_token(solve_id):
 def compute_solve_id(puzzle_id):
     pass
 
-# get ID of a puzzle with fewest logs in DB
+# get ID of a puzzle with fewest ot tied for fewest logs in DB
 def get_next_puzzle_id():
     query = ('SELECT s.puzzle_id as puzzle_id, s.count as num_solves FROM (SELECT puzzle_id, count(solve_id) FROM solve_info GROUP BY puzzle_id) as s WHERE s.count in (SELECT min(t.count) FROM (SELECT count(solve_id) FROM solve_info GROUP BY puzzle_id) as t);', ())
     rows = fetch_all_rows_for_query(query)
