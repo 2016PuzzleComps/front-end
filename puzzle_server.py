@@ -20,16 +20,30 @@ def compute_solve_id(puzzle_id):
 
 # get ID of a puzzle with fewest logs in DB
 def get_next_puzzle_id():
-    return 1 # (for now just load puzzle1.txt)
+    query = ('SELECT s.puzzle_id as puzzle_id, s.count as num_solves FROM (SELECT puzzle_id, count(solve_id) FROM solve_info GROUP BY puzzle_id) as s WHERE s.count in (SELECT min(t.count) FROM (SELECT count(solve_id) FROM solve_info GROUP BY puzzle_id) as t);', ())
+    rows = fetch_all_rows_for_query(query)
+    if not rows:
+        return None
+    return rows[0][0]
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    if puzzle_id == 1:
-        return open('puzzle1.txt').read()
+    puzzleFile = 'puzzle' + str(puzzle_id) + '.txt'
+    return open(puzzleFile).read()
 
 # load a solve log file into the DB
+# NOTE: I am assuming the log_file is string with a move per line
 def add_log_file_to_database(solve_id, log_file):
-    pass #TODO
+    moves = log_file.splitlines;
+    move_num = 0
+    for move in moves:
+        items = move.split()
+        timestamp = items[0]
+        move = items[1] + items[2]
+        query = ('INSERT INTO solve_logs values(%i, %i, %s, %s)', (solve_id, move_num, timestamp, move))
+        # NOTE: not sure if the db returns anything on an insert
+        rows = fetch_all_rows_for_query(query)
+        move_num++
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
