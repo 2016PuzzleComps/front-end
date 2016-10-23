@@ -3,6 +3,7 @@ import flask
 import psycopg2
 import json
 import config
+import hashlib
 
 app = flask.Flask(__name__)
 
@@ -12,38 +13,46 @@ def get_index():
 
 # compute the MTurk Token for a solve
 def compute_mturk_token(solve_id):
-    return "1337"
+    m = hashlib.md5()
+    m.update(solve_id.encode('utf-8'))
+    return m.hexdigest().decode('utf-8')
 
 # compute a unique identifier for a solve
 def compute_solve_id(puzzle_id):
-    pass
+    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %i;', (puzzle_id))
+    rows = fetch_all_rows_for_query(query)
+    num_solves = rows[0][0]
+    m = hashlib.md5()
+    to_hash = str(puzzle_id) + '.' + str(num_solves)
+    m.update(to_hash.encode('utf-8'))
+    return m.hexdigest().decode('utf-8')
 
-# get ID of a puzzle with fewest ot tied for fewest logs in DB
+# get ID of a puzzle with fewest or tied for fewest logs in DB
 def get_next_puzzle_id():
     query = ('SELECT s.puzzle_id as puzzle_id, s.count as num_solves FROM (SELECT puzzle_id, count(solve_id) FROM solve_info GROUP BY puzzle_id) as s WHERE s.count in (SELECT min(t.count) FROM (SELECT count(solve_id) FROM solve_info GROUP BY puzzle_id) as t);', ())
     rows = fetch_all_rows_for_query(query)
     if not rows:
-        return None
-    return rows[0][0]
+        return None # TODO: deal with this better
+    puzzle_id = rows[0][0]
+    return puzzle_id
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    puzzleFile = 'puzzle' + str(puzzle_id) + '.txt'
-    return open(puzzleFile).read()
+    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %i;', (puzzle_id))
+    rows = fetch_all_rows_for_query(query)
+    puzzle_file = rows[0][0]
+    return puzzle_file
 
 # load a solve log file into the DB
-# NOTE: I am assuming the log_file is string with a move per line
 def add_log_file_to_database(solve_id, log_file):
-    moves = log_file.splitlines;
-    move_num = 0
-    for move in moves:
-        items = move.split()
-        timestamp = items[0]
-        move = items[1] + items[2]
+    moves = log_file.split('\n')
+    for move_num in range(len(moves)):
+        line = moves[move_num]
+        split = line.split(' ')
+        timestamp = split[0]
+        move = ' '.join(split[1:])
         query = ('INSERT INTO solve_logs values(%i, %i, %s, %s)', (solve_id, move_num, timestamp, move))
-        # NOTE: not sure if the db returns anything on an insert
-        rows = fetch_all_rows_for_query(query)
-        move_num++
+        fetch_all_rows_for_query(query)
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
@@ -83,7 +92,7 @@ if __name__ == '__main__':
         connection = psycopg2.connect(database=config.database, user=config.user, password=config.password)
         cursor = connection.cursor()
     except Exception as e:
-        try_print(e)
+        print(e)
         exit(1)
     host = sys.argv[1]
     port = sys.argv[2]
