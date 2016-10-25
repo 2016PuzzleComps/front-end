@@ -15,17 +15,17 @@ def get_index():
 def compute_mturk_token(solve_id):
     m = hashlib.md5()
     m.update(solve_id.encode('utf-8'))
-    return m.hexdigest().decode('utf-8')
+    return m.hexdigest()
 
 # compute a unique identifier for a solve
 def compute_solve_id(puzzle_id):
-    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %i', (puzzle_id))
+    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
     rows = fetch_all_rows_for_query(query)
     num_solves = rows[0][0]
     m = hashlib.md5()
     to_hash = str(puzzle_id) + '.' + str(num_solves)
     m.update(to_hash.encode('utf-8'))
-    return m.hexdigest().decode('utf-8')
+    return m.hexdigest()
 
 # get ID of a puzzle with fewest or tied for fewest logs in DB
 def get_next_puzzle_id():
@@ -38,24 +38,28 @@ def get_next_puzzle_id():
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %i;', (puzzle_id))
+    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %s;', (puzzle_id,))
     rows = fetch_all_rows_for_query(query)
-    puzzle_file = rows[0][1]
+    puzzle_file = rows[0][0]
     return puzzle_file
 
 # load a solve log file into the DB
 def add_log_file_to_database(solve_id, log_file):
+    # first add an entry to solve_info
+    query = ('INSERT INTO solve_info values(%s, %s, %s)', (solve_id, puzzle_id, mturk_token))
+    fetch_all_rows_for_query(query)
+    # then add each move in the log to solve_logs
     moves = log_file.split('\n')
     for move_num in range(len(moves)):
         line = moves[move_num]
         split = line.split(' ')
         timestamp = split[0]
         move = ' '.join(split[1:])
-        query = ('INSERT INTO solve_logs values(%i, %i, %s, %s)', (solve_id, move_num, timestamp, move))
+        query = ('INSERT INTO solve_logs values(%s, %s, %s, %s)', (solve_id, move_num, timestamp, move))
         fetch_all_rows_for_query(query)
 
     # increments num_solve for the puzzle_id
-    query = ('update puzzles_by_id set num_solves = (num_solves + 1) where puzzle_id in (select puzzle_id from solve_info where solve_id = %i)', (solve_id))
+    query = ('update puzzles_by_id set num_solves = (num_solves + 1) where puzzle_id in (select puzzle_id from solve_info where solve_id = %s)', (solve_id,))
     fetch_all_rows_for_query(query)
 
 # serve puzzles to clients
@@ -74,8 +78,8 @@ def put_log_file():
     solve_id = request['solve_id']
     log_file = request['log_file']
     print(log_file)
-    add_log_file_to_database(solve_id, log_file)
-    response = {'mturk_token': compute_mturk_token(solve_id)}
+    mturk_token = add_log_file_to_database(solve_id, log_file)
+    response = {'mturk_token': mturk_token}
     return json.dumps(response)
 
 
@@ -84,6 +88,7 @@ def put_log_file():
 def fetch_all_rows_for_query(query):
     rows = []
     try:
+        print(query)
         cursor.execute(query[0], query[1])
         rows = cursor.fetchall()
     except Exception as e:
