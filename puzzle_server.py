@@ -44,7 +44,7 @@ def get_puzzle_file_from_database(puzzle_id):
     return puzzle_file
 
 # load a solve log file into the DB
-def add_log_file_to_database(solve_id, puzzle_id):
+def init_new_solve_info(solve_id, puzzle_id):
     # add an entry to solve_info
     mturk_token = compute_mturk_token(solve_id)
     query = ('INSERT INTO solve_info VALUES(%s, %s, %s);', (solve_id, puzzle_id, mturk_token))
