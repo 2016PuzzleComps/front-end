@@ -4,6 +4,7 @@ import psycopg2
 import json
 import config1 as config
 import hashlib
+import time
 
 app = flask.Flask(__name__)
 
@@ -14,7 +15,8 @@ def get_index():
 # compute the MTurk Token for a solve
 def compute_mturk_token(solve_id):
     m = hashlib.md5()
-    m.update((solve_id + ' ').encode('utf-8'))
+    food = solve_id + str(time.time())
+    m.update(food.encode('utf-8'))
     return m.hexdigest()
 
 # compute a unique identifier for a solve
@@ -23,8 +25,8 @@ def compute_solve_id(puzzle_id):
     rows = fetch_all_rows_for_query(query)
     num_solves = rows[0][0]
     m = hashlib.md5()
-    to_hash = str(puzzle_id) + '.' + str(num_solves)
-    m.update(to_hash.encode('utf-8'))
+    food = str(puzzle_id) + '.' + str(num_solves)
+    m.update(food.encode('utf-8'))
     return m.hexdigest()
 
 # get ID of a puzzle with fewest or tied for fewest logs in DB
