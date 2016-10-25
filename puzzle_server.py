@@ -2,7 +2,7 @@ import sys
 import flask
 import psycopg2
 import json
-import config
+import config1 as config
 import hashlib
 
 app = flask.Flask(__name__)
@@ -93,7 +93,7 @@ def fetch_all_rows_for_query(query):
 
 if __name__ == '__main__':
     try:
-        connection = psycopg2.connect(database=config.database, user=config.user, password=config.password)
+        connection = psycopg2.connect(user=config.username, password=config.password)
         cursor = connection.cursor()
     except Exception as e:
         print(e)
