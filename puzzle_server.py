@@ -40,7 +40,7 @@ def get_next_puzzle_id():
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %s;', (puzzle_id,))
+    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
     rows = fetch_all_rows_for_query(query)
     puzzle_file = rows[0][0]
     return puzzle_file
@@ -49,7 +49,7 @@ def get_puzzle_file_from_database(puzzle_id):
 def init_new_solve_info(solve_id, puzzle_id):
     # add an entry to solve_info
     mturk_token = compute_mturk_token(solve_id)
-    query = ('INSERT INTO solve_info VALUES(%s, %s, %s);', (solve_id, puzzle_id, mturk_token))
+    query = ('INSERT INTO solve_info VALUES(%s, %s, %s)', (solve_id, puzzle_id, mturk_token))
     fetch_all_rows_for_query(query)
 
 # load a solve log file into the DB
