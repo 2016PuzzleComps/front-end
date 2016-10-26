@@ -50,7 +50,7 @@ def get_puzzle_file_from_database(puzzle_id):
 def get_solve_info(solve_id):
     query = ('SELECT puzzle_id, mturk_token FROM solve_info WHERE solve_id = %s', (solve_id,))
     rows = fetch_all_rows_for_query(query)
-    return rows[0][0]
+    return rows[0]
 
 # load a solve log file into the DB
 def init_new_solve_info(solve_id, puzzle_id):
