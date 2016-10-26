@@ -10,8 +10,9 @@ var log="";
 var moveList = [];
 var currentMove;
 
+var gameOver = false;
+
 var solveID;
-var puzzleID;
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('resetButton').onclick = resetBoard;
@@ -302,7 +303,7 @@ function moveVehicleTo(vehicle, pos) {
 
 function selectVehicle(pos) {
 	// if puzzle is loaded
-	if(!board) {
+	if(gameOver || !board) {
 		return;
 	}
 	// find if pos is over a vehicle on the board
@@ -398,6 +399,7 @@ function deselectVehicle(evt) {
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
 			alert("You've won! ");
+			gameOver = true;
 			submitLog();
 		}
 		// deselect vehicle
