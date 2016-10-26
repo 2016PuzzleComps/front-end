@@ -4,6 +4,7 @@ import psycopg2
 import json
 import config1 as config
 import hashlib
+import datetime
 import time
 
 app = flask.Flask(__name__)
@@ -15,17 +16,19 @@ def get_index():
 # compute the MTurk Token for a solve
 def compute_mturk_token(solve_id):
     m = hashlib.md5()
-    food = solve_id + str(time.time())
+    #food = solve_id + str(time.time())
+    food = solve_id
     m.update(food.encode('utf-8'))
     return m.hexdigest()
 
 # compute a unique identifier for a solve
 def compute_solve_id(puzzle_id):
-    query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
-    rows = fetch_all_rows_for_query(query)
-    num_solves = rows[0][0]
+    #query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
+    #rows = fetch_all_rows_for_query(query)
+    #num_solves = rows[0]
+    date = datetime.datetime.now()
     m = hashlib.md5()
-    food = str(puzzle_id) + '.' + str(num_solves)
+    food = str(puzzle_id) + '.' + str(date)
     m.update(food.encode('utf-8'))
     return m.hexdigest()
 
@@ -49,23 +52,25 @@ def get_puzzle_file_from_database(puzzle_id):
 def init_new_solve_info(solve_id, puzzle_id):
     # add an entry to solve_info
     mturk_token = compute_mturk_token(solve_id)
-    query = ('INSERT INTO solve_info VALUES(%s, %s, %s)', (solve_id, puzzle_id, mturk_token))
-    fetch_all_rows_for_query(query)
+    query = ("INSERT INTO solve_info (solve_id, puzzle_id, mturk_token) VALUES (%s, %s, %s)" , (solve_id, puzzle_id, mturk_token))
+    insert_rows_for_query(query)
 
 # load a solve log file into the DB
 def add_log_file_to_database(solve_id, puzzle_id, mturk_token, log_file):
     # then add each move in the log to solve_logs
+    log_file = log_file.strip()
     moves = log_file.split('\n')
     for move_num in range(len(moves)):
         line = moves[move_num]
         split = line.split(' ')
+        print (split)
         timestamp = split[0]
         move = ' '.join(split[1:])
         query = ('INSERT INTO solve_logs VALUES(%s, %s, %s, %s)', (solve_id, move_num, timestamp, move))
-        fetch_all_rows_for_query(query)
+        insert_rows_for_query(query)
     # then increment num_solves for the puzzle_id
     query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
-    fetch_all_rows_for_query(query)
+    insert_rows_for_query(query)
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
@@ -74,7 +79,7 @@ def get_puzzle_file():
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
     solve_id = compute_solve_id(puzzle_id)
     init_new_solve_info(solve_id, puzzle_id)
-    response = {'solve_id': solve_id, 'puzzle_file': puzzle_file}
+    response = {'solve_id': solve_id, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -83,8 +88,10 @@ def put_log_file():
     request = json.loads(flask.request.data.decode('utf-8'))
     solve_id = request['solve_id']
     log_file = request['log_file']
+    puzzle_id = request['puzzle_id']
+    mturk_token = compute_mturk_token(solve_id)
     print(log_file)
-    add_log_file_to_database(solve_id, log_file)
+    add_log_file_to_database(solve_id, puzzle_id,mturk_token, log_file)
     response = {'mturk_token': mturk_token}
     return json.dumps(response)
 
@@ -100,6 +107,14 @@ def fetch_all_rows_for_query(query):
         raise e
     return rows
 
+# Executes an insert query and doesn't look for rows to be returned
+def insert_rows_for_query(query):
+    try:
+        print(query)
+        cursor.execute(query[0], query[1])
+        connection.commit()
+    except Exception as e:
+        raise e
 
 if __name__ == '__main__':
     try:

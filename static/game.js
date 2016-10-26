@@ -11,6 +11,7 @@ var moveList = [];
 var currentMove;
 
 var solveID;
+var puzzleID;
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('resetButton').onclick = resetBoard;
@@ -427,6 +428,7 @@ function getPuzzleFile() {
 	requester.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		solveID = resp.solve_id;
+        puzzleID = resp.puzzle_id;
 		loadBoardFromText(resp.puzzle_file);
 	});
 	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
@@ -446,7 +448,8 @@ function submitLog() {
 	req.open("POST", "http://" + puzzleServerURL + "/log-file");
 	var msg = {
 		solve_id: solveID,
-		log_file: log
+		log_file: log,
+        puzzle_id: puzzleID 
 	};
 	req.send(JSON.stringify(msg));
 }
