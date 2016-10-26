@@ -442,7 +442,7 @@ function submitLog() {
     
     // Display to the user the token for input into MTurk
 		MTurkToken = resp.mturk_token;
-		document.getElementById("code").innerHTML = "Solution Code: " + MTurkToken;
+		document.getElementById("code").innerHTML = MTurkToken;
 	});
 	req.open("POST", "http://" + puzzleServerURL + "/log-file");
 	var msg = {
