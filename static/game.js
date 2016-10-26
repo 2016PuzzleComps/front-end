@@ -428,7 +428,6 @@ function getPuzzleFile() {
 	requester.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		solveID = resp.solve_id;
-        puzzleID = resp.puzzle_id;
 		loadBoardFromText(resp.puzzle_file);
 	});
 	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
@@ -449,7 +448,6 @@ function submitLog() {
 	var msg = {
 		solve_id: solveID,
 		log_file: log,
-        puzzle_id: puzzleID 
 	};
 	req.send(JSON.stringify(msg));
 }

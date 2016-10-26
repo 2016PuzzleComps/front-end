@@ -4,7 +4,6 @@ import psycopg2
 import json
 import config1 as config
 import hashlib
-import datetime
 import time
 
 app = flask.Flask(__name__)
@@ -26,9 +25,8 @@ def compute_solve_id(puzzle_id):
     #query = ('SELECT num_solves FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
     #rows = fetch_all_rows_for_query(query)
     #num_solves = rows[0]
-    date = datetime.datetime.now()
     m = hashlib.md5()
-    food = str(puzzle_id) + '.' + str(date)
+    food = str(puzzle_id) + '.' + str(time.time())
     m.update(food.encode('utf-8'))
     return m.hexdigest()
 
@@ -48,6 +46,12 @@ def get_puzzle_file_from_database(puzzle_id):
     puzzle_file = rows[0][0]
     return puzzle_file
 
+# get the puzzle_id associated with a given solve_id
+def get_solve_info(solve_id):
+    query = ('SELECT puzzle_id, mturk_token FROM solve_info WHERE solve_id = %s', (solve_id,))
+    rows = fetch_all_rows_for_query(query)
+    return rows[0][0]
+
 # load a solve log file into the DB
 def init_new_solve_info(solve_id, puzzle_id):
     # add an entry to solve_info
@@ -56,7 +60,7 @@ def init_new_solve_info(solve_id, puzzle_id):
     insert_rows_for_query(query)
 
 # load a solve log file into the DB
-def add_log_file_to_database(solve_id, puzzle_id, mturk_token, log_file):
+def add_log_file_to_database(solve_id, puzzle_id, log_file):
     # then add each move in the log to solve_logs
     log_file = log_file.strip()
     moves = log_file.split('\n')
@@ -79,7 +83,7 @@ def get_puzzle_file():
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
     solve_id = compute_solve_id(puzzle_id)
     init_new_solve_info(solve_id, puzzle_id)
-    response = {'solve_id': solve_id, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file}
+    response = {'solve_id': solve_id, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -88,10 +92,9 @@ def put_log_file():
     request = json.loads(flask.request.data.decode('utf-8'))
     solve_id = request['solve_id']
     log_file = request['log_file']
-    puzzle_id = request['puzzle_id']
-    mturk_token = compute_mturk_token(solve_id)
+    puzzle_id, mturk_token = get_solve_info(solve_id)
     print(log_file)
-    add_log_file_to_database(solve_id, puzzle_id,mturk_token, log_file)
+    add_log_file_to_database(solve_id, puzzle_id, log_file)
     response = {'mturk_token': mturk_token}
     return json.dumps(response)
 
