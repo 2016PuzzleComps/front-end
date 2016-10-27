@@ -429,8 +429,12 @@ function getPuzzleFile() {
 	var requester = new XMLHttpRequest();
 	requester.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
-		solveID = resp.solve_id;
-		loadBoardFromText(resp.puzzle_file);
+		if(resp.success) {
+			solveID = resp.solve_id;
+			loadBoardFromText(resp.puzzle_file);
+		} else {
+			alert(resp.message);
+		}
 	});
 	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
 	requester.send(null);
@@ -441,10 +445,14 @@ function submitLog() {
 	var req = new XMLHttpRequest();
 	req.addEventListener('load', function() {
 		var resp = JSON.parse(this.responseText);
-    
-    // Display to the user the token for input into MTurk
-		MTurkToken = resp.mturk_token;
-		document.getElementById("code").innerHTML = MTurkToken;
+		if(resp.success) {
+			// Display to the user the token for input into MTurk
+			MTurkToken = resp.mturk_token;
+			document.getElementById("code").innerHTML = MTurkToken;
+		} else {
+			alert(resp.message);
+			gameOver = true;
+		}
 	});
 	req.open("POST", "http://" + puzzleServerURL + "/log-file");
 	var msg = {

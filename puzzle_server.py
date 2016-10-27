@@ -50,7 +50,10 @@ def get_puzzle_file_from_database(puzzle_id):
 def get_solve_info(solve_id):
     query = ('SELECT puzzle_id, mturk_token FROM solve_info WHERE solve_id = %s', (solve_id,))
     rows = fetch_all_rows_for_query(query)
-    return rows[0]
+    if len(rows) > 0:
+        return rows[0]
+    else:
+        return None
 
 # load a solve log file into the DB
 def init_new_solve_info(solve_id, puzzle_id):
@@ -58,6 +61,12 @@ def init_new_solve_info(solve_id, puzzle_id):
     mturk_token = compute_mturk_token(solve_id)
     query = ("INSERT INTO solve_info (solve_id, puzzle_id, mturk_token) VALUES (%s, %s, %s)" , (solve_id, puzzle_id, mturk_token))
     insert_rows_for_query(query)
+
+# see if an mturk_token corresponds to a log file
+def verify_mturk_token(mturk_token):
+    query = ('SELECT COUNT (*) FROM solve_logs WHERE solve_logs.solve_id = solve_info.solve_id AND solve_info.mturk_token = %s', (mturk_token,))
+    rows = fetch_all_rows_for_query(query)
+    return rows[0] > 0
 
 # load a solve log file into the DB
 def add_log_file_to_database(solve_id, puzzle_id, log_file):
@@ -67,7 +76,7 @@ def add_log_file_to_database(solve_id, puzzle_id, log_file):
     for move_num in range(len(moves)):
         line = moves[move_num]
         split = line.split(' ')
-        print (split)
+        print(split)
         timestamp = split[0]
         move = ' '.join(split[1:])
         query = ('INSERT INTO solve_logs VALUES(%s, %s, %s, %s)', (solve_id, move_num, timestamp, move))
@@ -83,7 +92,7 @@ def get_puzzle_file():
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
     solve_id = compute_solve_id(puzzle_id)
     init_new_solve_info(solve_id, puzzle_id)
-    response = {'solve_id': solve_id, 'puzzle_file': puzzle_file}
+    response = {'success': True, 'solve_id': solve_id, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -92,11 +101,16 @@ def put_log_file():
     request = json.loads(flask.request.data.decode('utf-8'))
     solve_id = request['solve_id']
     log_file = request['log_file']
-    puzzle_id, mturk_token = get_solve_info(solve_id)
-    print(log_file)
-    add_log_file_to_database(solve_id, puzzle_id, log_file)
-    response = {'mturk_token': mturk_token}
-    return json.dumps(response)
+    solve_info = get_solve_info(solve_id)
+    if solve_info:
+        puzzle_id, mturk_token = solve_info
+        print(log_file)
+        add_log_file_to_database(solve_id, puzzle_id, log_file)
+        response = {'success': True, 'mturk_token': mturk_token}
+        return json.dumps(response)
+    else:
+        response = {'success': False, 'message': "invalid solve_id"}
+        return json.dumps(response)
 
 # Returns a list of rows obtained from the database by the specified SQL query.
 # If the query fails for any reason, an empty list is returned.
