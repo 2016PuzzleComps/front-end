@@ -1,4 +1,4 @@
-var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000/'
+var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000'
 
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
