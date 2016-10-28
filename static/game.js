@@ -189,7 +189,7 @@ function drawFrame() {
 	context.moveTo(0, 0);
 	context.lineTo(0, board.height * squareSize);
 	context.lineTo(board.width * squareSize, board.height * squareSize);
-	context.lineTo(board.width * squareSize, board.height * squareSize);
+	context.lineTo(board.width * squareSize, 0);
 	context.lineTo(0, 0);
 	context.stroke();
 	// clear exit
