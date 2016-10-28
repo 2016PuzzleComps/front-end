@@ -1,4 +1,4 @@
-var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000'
+var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000';
 
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
@@ -14,7 +14,6 @@ var gameOver = false;
 
 var solveID;
 
-document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('resetButton').onclick = resetBoard;
 document.getElementById('undoButton').onclick = undoMove;
 
@@ -88,24 +87,6 @@ function Move(vehicle, ipos, fpos) {
 	this.fpos = fpos;
 }
 
-// Handles a user uploading a file
-function handleFileSelect(evt) {
-	var files = evt.target.files; // FileList object
-
-	// files is a FileList of File objects. List some properties.
-	var output = [];
-	var file = files[0];
-	var reader = new FileReader();
-
-	// If we use onloadend, we need to check the readyState.
-	reader.onloadend = function(evt) {
-		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-			loadBoardFromText(evt.target.result);
-		}
-	};
-	reader.readAsText(file);
-}
-
 // Loads a board from a given block of text
 function loadBoardFromText(text) {
 	initialBoard = text;
@@ -130,7 +111,7 @@ function loadBoardFromText(text) {
 
 // Resets the board to the initial state (if there is one)
 function resetBoard() {
-	if (initialBoard != "") {
+	if(!gameOver && initialBoard != "") {
 		loadBoardFromText(initialBoard);
 		// clear most recent moves and log the board reset
 		moveList = [];
@@ -140,7 +121,7 @@ function resetBoard() {
 
 // undoes the last move
 function undoMove() {
-	if (moveList.length > 0) {
+	if(!gameOver && moveList.length > 0) {
 		var lastMove = moveList.pop();
 		var currentPos;
 		// remove the vehicle from the prototype
@@ -160,7 +141,7 @@ function saveMove(selectedVehicleIndex, move) {
 	var selectedVehicle = board.vehicles[selectedVehicleIndex];
 
 	// save to the currentMove
-	if (selectedVehicle.horiz) {
+	if(selectedVehicle.horiz) {
 		currentMove.fpos = selectedVehicle.x;
 	} else {
 		currentMove.fpos = selectedVehicle.y;
@@ -204,17 +185,13 @@ function drawVehicle(vehicle) {
 function drawFrame() {
 	// clear everything
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	// draw board grid
-	for(var i = 0; i <= board.width; i++) {
-		context.moveTo(0, (i * squareSize));
-		context.lineTo(board.width * squareSize, (i * squareSize));
-		context.stroke();
-	}
-	for(var i = 0; i <= board.height; i++) {
-		context.moveTo((i * squareSize), 0);
-		context.lineTo((i * squareSize), board.height * squareSize);
-		context.stroke();
-	}
+	// draw board border
+	context.moveTo(0, 0);
+	context.lineTo(0, board.height * squareSize);
+	context.lineTo(board.width * squareSize, board.height * squareSize);
+	context.lineTo(board.width * squareSize, board.height * squareSize);
+	context.lineTo(0, 0);
+	context.stroke();
 	// clear exit
 	var clearX, clearY;
 	var clearWidth = squareSize - 2;
@@ -398,7 +375,7 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
-			alert("You've won! ");
+			alert("You've won!");
 			gameOver = true;
 			submitLog();
 		}
