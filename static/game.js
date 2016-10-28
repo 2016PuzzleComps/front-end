@@ -3,6 +3,8 @@ var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000';
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
 var squareSize = 100;
+var borderWidth = 30;
+var borderColor = '#916f25';
 
 var board;
 var initialBoard = "";
@@ -168,9 +170,9 @@ function logMove(moveString) {
 function drawVehicle(vehicle) {
 	context.beginPath();
 	if(vehicle.horiz) {
-		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, vehicle.size * squareSize, squareSize);
+		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, vehicle.size * squareSize, squareSize);
 	} else {
-		context.rect(vehicle.x * squareSize, vehicle.y * squareSize, squareSize, vehicle.size * squareSize);
+		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, squareSize, vehicle.size * squareSize);
 	}
 	if(vehicle.isVip) {
 		context.fillStyle = vipColor;
@@ -183,23 +185,33 @@ function drawVehicle(vehicle) {
 }
 
 function drawFrame() {
-	// clear everything
+	// clear everything //
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	// draw board border
-	context.moveTo(0, 0);
-	context.lineTo(0, board.height * squareSize);
-	context.lineTo(board.width * squareSize, board.height * squareSize);
-	context.lineTo(board.width * squareSize, 0);
+	// draw border //
+	// brown background
+	context.beginPath();
+	context.rect(0, 0, borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
+	context.fillStyle = borderColor;
+	context.fill();
+	context.closePath();
+	// clear board
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	// black lines
+	context.beginPath();
+	context.moveTo(borderWidth, borderWidth);
+	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
+	context.lineTo(borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
+	context.closePath();
 	context.lineTo(0, 0);
 	context.stroke();
-	// clear exit
+	// clear exit //
 	var clearX, clearY;
 	var clearWidth = squareSize - 2;
 	var clearHeight = squareSize - 2;
 	clearX = (board.width * squareSize) - 1;
 	clearY = board.exit_offset * squareSize + 1;
 	context.clearRect(clearX, clearY, clearWidth, clearHeight);
-	// draw vehicles
+	// draw vehicles //
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
