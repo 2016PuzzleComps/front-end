@@ -206,7 +206,7 @@ function drawFrame() {
 	var clearX, clearY;
 	var clearWidth = borderWidth;
 	var clearHeight = squareSize;
-	clearX = borderWidth + (board.width * squareSize);
+	clearX = borderWidth + (board.width * squareSize) - 1;
 	clearY = borderWidth + (board.exit_offset * squareSize);
 	context.fillRect(clearX, clearY, clearWidth, clearHeight);
 	// draw vehicles //
