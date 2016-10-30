@@ -169,6 +169,7 @@ function logMove(moveString) {
 }
 
 function drawVehicle(vehicle) {
+	context.beginPath();
 	if(vehicle.isVip) {
 		context.fillStyle = vipColor;
 	} else {
