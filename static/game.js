@@ -204,11 +204,11 @@ function drawFrame() {
 	context.stroke();
 	// exit is part of board //
 	var clearX, clearY;
-	var clearWidth = squareSize - 2;
-	var clearHeight = squareSize - 2;
-	clearX = (board.width * squareSize) - 1;
-	clearY = board.exit_offset * squareSize + 1;
-	context.clearRect(clearX, clearY, clearWidth, clearHeight);
+	var clearWidth = borderWidth;
+	var clearHeight = squareSize;
+	clearX = borderWidth + (board.width * squareSize);
+	clearY = borderWidth + (board.exit_offset * squareSize);
+	context.fillRect(clearX, clearY, clearWidth, clearHeight);
 	// draw vehicles //
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
