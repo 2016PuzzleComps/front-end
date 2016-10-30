@@ -11,6 +11,7 @@ body {
     text-align: center;
     text-decoration: none;
     display: inline-block;
+	outline: none;
 }
 .button:hover {
 	background-color: #71c174;
