@@ -392,8 +392,11 @@ function deselectVehicle(evt) {
 		// draw frame, twice to avoid rendering bugs
 		drawFrame();
 		// check for victory and output code
-		if(selectedVehicle.isVip && selectedVehicle.x >= board.width) {
-			alert("You've won!");
+		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
+			//alert("You've won!");
+            openFinish();
+            selectedVehicle.x = board.width + 1;
+            drawFrame();
 			gameOver = true;
 			submitLog();
 		}
@@ -418,6 +421,11 @@ document.body.addEventListener("touchmove", function (e) {
 		e.preventDefault();
 	}
 }, false);
+
+// open the win tab
+function openFinish() {
+    document.getElementById("finish").style.height = "100%";
+}
 
 // receive puzzle from server
 function getPuzzleFile() {

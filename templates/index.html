@@ -1,13 +1,21 @@
 <!doctype html>
 <html>
 <head>
-
 </head>
 <body>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
 	<button type="button" id="resetButton">Reset</button>
 	<button type="button" id="undoButton">Undo</button>
-	<p> Solution Code: <span id="code"> </span></p>
-	<canvas id="gameCanvas" width="1920" height="1080"> </canvas>
+    <!--<p> Solution Code: <span id="code"> </span></p>-->
+    <p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
+
+    <div id="finish" class="overlay">
+        <div class="overlay-content">
+            <p>MTurk Token:</p>
+            <p id="code"></p>
+        </div>
+    </div>
+
 	<script src="{{ url_for('static', filename='game.js') }}"></script>
 </body>
 </html>
