@@ -190,19 +190,18 @@ function drawFrame() {
 	// draw border //
 	// brown background
 	context.beginPath();
-	context.rect(0, 0, borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
+	context.rect(0, 0, (borderWidth * 2) + (board.width * squareSize), (borderWidth * 2) + (board.height * squareSize));
 	context.fillStyle = borderColor;
 	context.fill();
 	context.closePath();
 	// clear board
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	// black lines
+	context.clearRect(borderWidth, borderWidth, board.width, board.height);
+	// draw lines around board
 	context.beginPath();
 	context.moveTo(borderWidth, borderWidth);
 	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
 	context.lineTo(borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
 	context.closePath();
-	context.lineTo(0, 0);
 	context.stroke();
 	// clear exit //
 	var clearX, clearY;
