@@ -453,7 +453,7 @@ function submitLog() {
 			MTurkToken = resp.mturk_token;
 			document.getElementById("code").innerHTML = MTurkToken;
 		} else {
-			alert(resp.message);
+			document.getElementById("code").innerHTML = resp.message;
 			gameOver = true;
 		}
 	});
