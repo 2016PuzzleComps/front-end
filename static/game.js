@@ -5,6 +5,7 @@ var vipColor = '#b54141';
 var squareSize = 100;
 var borderWidth = 30;
 var borderColor = '#916f25';
+var boardColor = '#e8d39b';
 
 var board;
 var initialBoard = "";
@@ -188,11 +189,12 @@ function drawFrame() {
 	// clear everything //
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	// draw border //
-	// brown background
+	// brown border
 	context.fillStyle = borderColor;
 	context.fillRect(0, 0, (borderWidth * 2) + (board.width * squareSize), (borderWidth * 2) + (board.height * squareSize));
-	// clear board
-	context.clearRect(borderWidth, borderWidth, board.width, board.height);
+	// light brown inside
+	context.fillStyle = boardColor;
+	context.fillRect(borderWidth, borderWidth, board.width * squareSize, board.height * squareSize);
 	// draw lines around board
 	context.beginPath();
 	context.moveTo(borderWidth, borderWidth);
@@ -201,7 +203,7 @@ function drawFrame() {
 	context.lineTo(borderWidth + (board.width * squareSize), borderWidth);
 	context.closePath();
 	context.stroke();
-	// clear exit //
+	// exit is part of board //
 	var clearX, clearY;
 	var clearWidth = squareSize - 2;
 	var clearHeight = squareSize - 2;
