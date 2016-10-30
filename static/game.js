@@ -204,7 +204,7 @@ function drawFrame() {
 	context.stroke();
 	// exit is part of board //
 	var clearX, clearY;
-	var clearWidth = borderWidth;
+	var clearWidth = borderWidth + 1;
 	var clearHeight = squareSize;
 	clearX = borderWidth + (board.width * squareSize) - 1;
 	clearY = borderWidth + (board.exit_offset * squareSize);
