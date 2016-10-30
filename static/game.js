@@ -193,15 +193,7 @@ function drawFrame() {
 	context.fillRect(0, 0, (borderWidth * 2) + (board.width * squareSize), (borderWidth * 2) + (board.height * squareSize));
 	// light brown inside
 	context.fillStyle = boardColor;
-	context.fillRect(borderWidth, borderWidth, board.width * squareSize, board.height * squareSize);
-	// draw lines around board
-	context.beginPath();
-	context.moveTo(borderWidth, borderWidth);
-	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
-	context.lineTo(borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
-	context.lineTo(borderWidth + (board.width * squareSize), borderWidth);
-	context.closePath();
-	context.stroke();
+	context.fillRect(borderWidth, borderWidth, board.width * squareSize + 2, board.height * squareSize);
 	// exit is part of board //
 	var clearX, clearY;
 	var clearWidth = borderWidth + 1;
@@ -209,7 +201,23 @@ function drawFrame() {
 	clearX = borderWidth + (board.width * squareSize) - 1;
 	clearY = borderWidth + (board.exit_offset * squareSize);
 	context.fillRect(clearX, clearY, clearWidth, clearHeight);
-	// draw vehicles //
+	// draw lines around board
+	context.beginPath();
+	context.moveTo(0,0);
+    context.lineTo(borderWidth * 2 + (board.width * squareSize), 0);
+    context.lineTo(borderWidth * 2 + (board.width * squareSize), clearY);
+    context.lineTo(clearX + 2, clearY);
+    context.lineTo(clearX + 2, borderWidth);
+    context.lineTo(borderWidth, borderWidth);
+	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
+    context.lineTo(clearX + 2, borderWidth + (board.height * squareSize));
+	context.lineTo(clearX + 2, clearY + clearHeight);
+	context.lineTo(clearX + clearWidth, clearY + clearHeight);
+	context.lineTo(clearX + clearWidth, (board.height * squareSize) + (borderWidth * 2));
+    context.lineTo(0, (board.height * squareSize) + (borderWidth * 2)); 
+	context.closePath();
+	context.stroke();
+    // draw vehicles //
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
