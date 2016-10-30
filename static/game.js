@@ -297,7 +297,7 @@ function selectVehicle(pos) {
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
 		if(v.horiz) {
-			if(((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
+			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
 				selectedVehicleIndex = i;
 				mouseOffset = pos.x - (v.x * squareSize);
 				break;
