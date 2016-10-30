@@ -228,8 +228,8 @@ var mouseOffset = 0;
 function getMousePos(evt) {
 	var rect = canvas.getBoundingClientRect();
 	return {
-		x: evt.clientX - rect.left,
-		y: evt.clientY - rect.top
+		x: evt.clientX - rect.left - borderWidth,
+		y: evt.clientY - rect.top - borderWidth
 	};
 }
 
@@ -237,8 +237,8 @@ function getMousePos(evt) {
 function getTouchPos(evt) {
 	var rect = canvas.getBoundingClientRect();
 	return {
-		x: evt.touches[0].clientX - rect.left,
-		y: evt.touches[0].clientY - rect.top
+		x: evt.touches[0].clientX - rect.left - borderWidth,
+		y: evt.touches[0].clientY - rect.top - borderWidth
 	};
 }
 
@@ -297,7 +297,7 @@ function selectVehicle(pos) {
 	for(i in board.vehicles) {
 		var v = board.vehicles[i];
 		if(v.horiz) {
-			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
+			if(((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
 				selectedVehicleIndex = i;
 				mouseOffset = pos.x - (v.x * squareSize);
 				break;
