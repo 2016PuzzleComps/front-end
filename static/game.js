@@ -169,20 +169,18 @@ function logMove(moveString) {
 }
 
 function drawVehicle(vehicle) {
-	context.beginPath();
-	if(vehicle.horiz) {
-		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, vehicle.size * squareSize, squareSize);
-	} else {
-		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, squareSize, vehicle.size * squareSize);
-	}
 	if(vehicle.isVip) {
 		context.fillStyle = vipColor;
 	} else {
 		context.fillStyle = vehicleColor;
 	}
-	context.fill();
-	context.stroke();
-	context.closePath();
+	if(vehicle.horiz) {
+		context.fillRect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, vehicle.size * squareSize, squareSize);
+		context.strokeRect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, vehicle.size * squareSize, squareSize);
+	} else {
+		context.fillRect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, squareSize, vehicle.size * squareSize);
+		context.strokeRect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, squareSize, vehicle.size * squareSize);
+	}
 }
 
 function drawFrame() {
