@@ -176,9 +176,9 @@ function drawVehicle(vehicle) {
 		context.fillStyle = vehicleColor;
 	}
 	if(vehicle.horiz) {
-		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, vehicle.size * squareSize, squareSize);
+		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, vehicle.size * squareSize, squareSize);
 	} else {
-		context.rect((vehicle.x + borderWidth) * squareSize, (vehicle.y + borderWidth) * squareSize, squareSize, vehicle.size * squareSize);
+		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, squareSize, vehicle.size * squareSize);
 	}
 	context.fill();
 	context.stroke();
