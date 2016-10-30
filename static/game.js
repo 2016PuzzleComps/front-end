@@ -201,6 +201,7 @@ function drawFrame() {
 	context.moveTo(borderWidth, borderWidth);
 	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
 	context.lineTo(borderWidth + (board.width * squareSize), borderWidth + (board.height * squareSize));
+	context.lineTo(borderWidth + (board.width * squareSize), borderWidth);
 	context.closePath();
 	context.stroke();
 	// clear exit //
