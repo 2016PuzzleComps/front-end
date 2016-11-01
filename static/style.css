@@ -22,6 +22,12 @@ body {
 #giveUpButton {
     background-color: red;
 }
+#giveUpButton:hover {
+	background-color: #e83c3c;
+}
+#giveUpButton:active {
+	background-color: #931919;
+}
 
 #gameCanvas {
     margin-right: auto;
