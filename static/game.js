@@ -1,3 +1,5 @@
+/* GLOBAL VARS */
+
 var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5000';
 
 var vehicleColor = '#306aad';
@@ -9,7 +11,7 @@ var boardColor = '#e8d39b';
 
 var board;
 var initialBoard = "";
-var log="";
+var log = "";
 var moveList = [];
 var currentMove;
 
@@ -17,16 +19,129 @@ var gameOver = false;
 
 var solveID;
 
-document.getElementById('resetButton').onclick = resetBoard;
-document.getElementById('undoButton').onclick = undoMove;
-document.getElementById('quitButton').onclick = quit;
-
-var canvas = document.getElementById("gameCanvas");
-var context = canvas.getContext("2d");
+// open the win tab
+function openFinish() {
+	document.getElementById("finish").style.height = "100%";
+}
 
 function waitToQuit() {
-		setTimeout( "quitButton.style.visibility = 'visible'", 300000 );
+	setTimeout("giveUpButton.style.display = 'inline-block'", 300000);
+}
+
+getPuzzleFile();
+waitToQuit();
+
+/* SERVER STUFF */
+
+// receive puzzle from server
+function getPuzzleFile() {
+	var requester = new XMLHttpRequest();
+	requester.addEventListener('load', function() {
+		resp = JSON.parse(this.responseText);
+		if(resp.success) {
+			solveID = resp.solve_id;
+			loadBoardFromText(resp.puzzle_file);
+		} else {
+			alert(resp.message);
+		}
+	});
+	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
+	requester.send(null);
+}
+
+// submit solve log to server
+function submitLog(completed) {
+	var req = new XMLHttpRequest();
+	req.addEventListener('load', function() {
+		var resp = JSON.parse(this.responseText);
+		if(resp.success) {
+			// Display to the user the token for input into MTurk
+			MTurkToken = resp.mturk_token;
+			document.getElementById("messageTitle").innerHTML = "MTurk Token: ";
+			document.getElementById("code").innerHTML = MTurkToken;
+		} else {
+			document.getElementById("messageTitle").innerHTML = "Oops... ";
+			document.getElementById("code").innerHTML = resp.message;
+		}
+		openFinish();
+	});
+	req.open("POST", "http://" + puzzleServerURL + "/log-file");
+	var status;
+	if(completed) {
+		status = 1;
+	} else {
+		status = 2;
 	}
+	var msg = {
+		solve_id: solveID,
+		log_file: log,
+		status: status
+	};
+	req.send(JSON.stringify(msg));
+}
+
+// Loads a board from a given block of text
+function loadBoardFromText(text) {
+	initialBoard = text;
+	var lines = text.split("\n");
+	var dimen = lines[0].split(" ");
+	var exitOffset = parseInt(lines[1].split(" ")[1]);
+	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
+	var isFirst = true;
+	for (var i=1; i<lines.length; i++) {
+		var items = lines[i].split(" ");
+		if (items.length != 4) {
+			break;
+		}
+		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
+		board.addVehicle(newVehicle);
+		if (isFirst) {
+			isFirst = false;
+		}
+	}
+	drawFrame();
+}
+
+/* BUTTON STUFF */
+
+document.getElementById('resetButton').onclick = resetBoard;
+document.getElementById('undoButton').onclick = undoMove;
+document.getElementById('giveUpButton').onclick = giveUp;
+
+// Resets the board to the initial state (if there is one)
+function resetBoard() {
+	if(!gameOver && initialBoard != "") {
+		loadBoardFromText(initialBoard);
+		// clear most recent moves and log the board reset
+		moveList = [];
+		logMove("R");
+	}
+}
+
+// undo the last move
+function undoMove() {
+	if(!gameOver && moveList.length > 0) {
+		var lastMove = moveList.pop();
+		var currentPos;
+		// remove the vehicle from the prototype
+		board.placeVehicle(lastMove.vehicle, false);
+		if (lastMove.vehicle.horiz) {
+			currentPos = lastMove.vehicle.x;
+		} else {
+			currentPos = lastMove.vehicle.y;
+		}
+		moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
+		logMove("U");
+	}
+}
+
+// give up and submit partial log to server
+function giveUp() {
+	gameOver = true;
+	submitLog(false);
+}
+
+/* CLASS DEFINITION STUFF */
 
 function Board(width, height, exit_offset) {
 	this.width = width;
@@ -62,12 +177,10 @@ function Board(width, height, exit_offset) {
 	this.occupied[this.width+i] = [];
 	this.occupied[this.width+i][this.exit_offset] = true;
 }
-
 Board.prototype.addVehicle = function(v) {
 	this.vehicles.push(v);
 	this.placeVehicle(v, true);
 }
-
 Board.prototype.placeVehicle = function(v, down) {
 	if(v.horiz) {
 		for(var i = 0; i < v.size; i++) {
@@ -88,73 +201,79 @@ function Vehicle(isVip, horiz, size, x, y) {
 	this.y = y;
 }
 
-// Stores the information in a move
 function Move(vehicle, ipos, fpos) {
 	this.vehicle = vehicle;
 	this.ipos = ipos;
 	this.fpos = fpos;
 }
 
-// Loads a board from a given block of text
-function loadBoardFromText(text) {
-	initialBoard = text;
-	var lines = text.split("\n");
-	var dimen = lines[0].split(" ");
-	var exitOffset = parseInt(lines[1].split(" ")[1]);
-	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
-	var isFirst = true;
-	for (var i=1; i<lines.length; i++) {
-		var items = lines[i].split(" ");
-		if (items.length != 4) {
-			break;
-		}
-		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
-		board.addVehicle(newVehicle);
-		if (isFirst) {
-			isFirst = false;
-		}
+/* CANVAS STUFF */
+
+var canvas = document.getElementById("gameCanvas");
+var context = canvas.getContext("2d");
+
+// draw a vehicle to the canvas
+function drawVehicle(vehicle) {
+	context.beginPath();
+	if(vehicle.isVip) {
+		context.fillStyle = vipColor;
+	} else {
+		context.fillStyle = vehicleColor;
 	}
-	drawFrame();
+	if(vehicle.horiz) {
+		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, vehicle.size * squareSize, squareSize);
+	} else {
+		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, squareSize, vehicle.size * squareSize);
+	}
+	context.fill();
+	context.stroke();
 }
 
-// Resets the board to the initial state (if there is one)
-function resetBoard() {
-	if(!gameOver && initialBoard != "") {
-		loadBoardFromText(initialBoard);
-		// clear most recent moves and log the board reset
-		moveList = [];
-		logMove("R");
+// render a frame
+function drawFrame() {
+	// clear everything //
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	// draw border //
+	// brown border
+	context.fillStyle = borderColor;
+	context.fillRect(0, 0, (borderWidth * 2) + (board.width * squareSize), (borderWidth * 2) + (board.height * squareSize));
+	// light brown inside
+	context.fillStyle = boardColor;
+	context.fillRect(borderWidth, borderWidth, board.width * squareSize + 2, board.height * squareSize);
+	// exit is part of board //
+	var clearX, clearY;
+	var clearWidth = borderWidth + 1;
+	var clearHeight = squareSize;
+	clearX = borderWidth + (board.width * squareSize) - 1;
+	clearY = borderWidth + (board.exit_offset * squareSize);
+	context.fillRect(clearX, clearY, clearWidth, clearHeight);
+	// draw lines around board
+	context.beginPath();
+	context.moveTo(0,0);
+	context.lineTo(borderWidth * 2 + (board.width * squareSize), 0);
+	context.lineTo(borderWidth * 2 + (board.width * squareSize), clearY);
+	context.lineTo(clearX + 2, clearY);
+	context.lineTo(clearX + 2, borderWidth);
+	context.lineTo(borderWidth, borderWidth);
+	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
+	context.lineTo(clearX + 2, borderWidth + (board.height * squareSize));
+	context.lineTo(clearX + 2, clearY + clearHeight);
+	context.lineTo(clearX + clearWidth, clearY + clearHeight);
+	context.lineTo(clearX + clearWidth, (board.height * squareSize) + (borderWidth * 2));
+	context.lineTo(0, (board.height * squareSize) + (borderWidth * 2));
+	context.closePath();
+	context.stroke();
+	// draw vehicles //
+	for(i in board.vehicles) {
+		drawVehicle(board.vehicles[i]);
 	}
 }
 
-// undoes the last move
-function undoMove() {
-	if(!gameOver && moveList.length > 0) {
-		var lastMove = moveList.pop();
-		var currentPos;
-		// remove the vehicle from the prototype
-		board.placeVehicle(lastMove.vehicle, false);
-		if (lastMove.vehicle.horiz) {
-			currentPos = lastMove.vehicle.x;
-		} else {
-			currentPos = lastMove.vehicle.y;
-		}
-		moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
-		logMove("U");
-	}
-}
-
-function quit() {
-	logMove("Q");
-	openFinish();
-	gameOver = true;
-	submitLog();
-}
+/* LOGGING STUFF */
 
 // saves a move to the movelist and log
 function saveMove(selectedVehicleIndex, move) {
 	var selectedVehicle = board.vehicles[selectedVehicleIndex];
-
 	// save to the currentMove
 	if(selectedVehicle.horiz) {
 		currentMove.fpos = selectedVehicle.x;
@@ -180,69 +299,11 @@ function logMove(moveString) {
 	log += Date.now() + " " + moveString + "\n";
 }
 
-function drawVehicle(vehicle) {
-	context.beginPath();
-	if(vehicle.isVip) {
-		context.fillStyle = vipColor;
-	} else {
-		context.fillStyle = vehicleColor;
-	}
-	if(vehicle.horiz) {
-		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, vehicle.size * squareSize, squareSize);
-	} else {
-		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, squareSize, vehicle.size * squareSize);
-	}
-	context.fill();
-	context.stroke();
-}
+/* MOUSE/TOUCH EVENT STUFF */
 
-function drawFrame() {
-	// clear everything //
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	// draw border //
-	// brown border
-	context.fillStyle = borderColor;
-	context.fillRect(0, 0, (borderWidth * 2) + (board.width * squareSize), (borderWidth * 2) + (board.height * squareSize));
-	// light brown inside
-	context.fillStyle = boardColor;
-	context.fillRect(borderWidth, borderWidth, board.width * squareSize + 2, board.height * squareSize);
-	// exit is part of board //
-	var clearX, clearY;
-	var clearWidth = borderWidth + 1;
-	var clearHeight = squareSize;
-	clearX = borderWidth + (board.width * squareSize) - 1;
-	clearY = borderWidth + (board.exit_offset * squareSize);
-	context.fillRect(clearX, clearY, clearWidth, clearHeight);
-	// draw lines around board
-	context.beginPath();
-	context.moveTo(0,0);
-    context.lineTo(borderWidth * 2 + (board.width * squareSize), 0);
-    context.lineTo(borderWidth * 2 + (board.width * squareSize), clearY);
-    context.lineTo(clearX + 2, clearY);
-    context.lineTo(clearX + 2, borderWidth);
-    context.lineTo(borderWidth, borderWidth);
-	context.lineTo(borderWidth, borderWidth + (board.height * squareSize));
-    context.lineTo(clearX + 2, borderWidth + (board.height * squareSize));
-	context.lineTo(clearX + 2, clearY + clearHeight);
-	context.lineTo(clearX + clearWidth, clearY + clearHeight);
-	context.lineTo(clearX + clearWidth, (board.height * squareSize) + (borderWidth * 2));
-    context.lineTo(0, (board.height * squareSize) + (borderWidth * 2));
-	context.closePath();
-	context.stroke();
-    // draw vehicles //
-	for(i in board.vehicles) {
-		drawVehicle(board.vehicles[i]);
-	}
-}
-
-/* MOUSE/TOUCH EVENTS */
-
-var fingerDown = false;
-
-// index of vehicle in board.vehicles that is selected by mouse
-var selectedVehicleIndex = null;
-// offset from origin of selected vehicle
-var mouseOffset = 0;
+var fingerDown = false; // whether a finger is touching the screen or not
+var selectedVehicleIndex = null; // index of vehicle in board.vehicles that is selected by mouse
+var mouseOffset = 0; // offset from origin of selected vehicle
 
 // get position of mouse at a mouse event
 function getMousePos(evt) {
@@ -308,6 +369,7 @@ function moveVehicleTo(vehicle, pos) {
 	drawFrame();
 }
 
+// start moving a vehicle
 function selectVehicle(pos) {
 	// if puzzle is loaded
 	if(gameOver || !board) {
@@ -343,6 +405,7 @@ function selectVehicle(pos) {
 	}
 }
 
+// drag a vehicle
 function moveVehicle(pos) {
 	if(selectedVehicleIndex != null) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
@@ -389,6 +452,7 @@ function moveVehicle(pos) {
 	}
 }
 
+// stop moving a vehicle
 function deselectVehicle(evt) {
 	if(selectedVehicleIndex) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
@@ -405,12 +469,11 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
-			//alert("You've won!");
-            openFinish();
-            selectedVehicle.x = board.width + 1;
-            drawFrame();
+			openFinish();
+			selectedVehicle.x = board.width + 1;
+			drawFrame();
 			gameOver = true;
-			submitLog();
+			submitLog(true);
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
@@ -433,49 +496,3 @@ document.body.addEventListener("touchmove", function (e) {
 		e.preventDefault();
 	}
 }, false);
-
-// open the win tab
-function openFinish() {
-    document.getElementById("finish").style.height = "100%";
-}
-
-// receive puzzle from server
-function getPuzzleFile() {
-	var requester = new XMLHttpRequest();
-	requester.addEventListener('load', function() {
-		resp = JSON.parse(this.responseText);
-		if(resp.success) {
-			solveID = resp.solve_id;
-			loadBoardFromText(resp.puzzle_file);
-		} else {
-			alert(resp.message);
-		}
-	});
-	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
-	requester.send(null);
-}
-
-// submit solve log to server
-function submitLog() {
-	var req = new XMLHttpRequest();
-	req.addEventListener('load', function() {
-		var resp = JSON.parse(this.responseText);
-		if(resp.success) {
-			// Display to the user the token for input into MTurk
-			MTurkToken = resp.mturk_token;
-			document.getElementById("code").innerHTML = MTurkToken;
-		} else {
-			document.getElementById("code").innerHTML = resp.message;
-			gameOver = true;
-		}
-	});
-	req.open("POST", "http://" + puzzleServerURL + "/log-file");
-	var msg = {
-		solve_id: solveID,
-		log_file: log,
-	};
-	req.send(JSON.stringify(msg));
-}
-
-getPuzzleFile();
-waitToQuit();

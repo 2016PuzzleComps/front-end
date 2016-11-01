@@ -102,11 +102,11 @@ def put_log_file():
     request = json.loads(flask.request.data.decode('utf-8'))
     solve_id = request['solve_id']
     log_file = request['log_file']
+    status = request['status']
     try:
         solve_info = get_solve_info(solve_id)
         if solve_info:
             puzzle_id, mturk_token = solve_info
-            print(log_file)
             add_log_file_to_database(solve_id, puzzle_id, log_file)
             response = {'success': True, 'mturk_token': mturk_token}
             return json.dumps(response)

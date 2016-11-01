@@ -1,22 +1,21 @@
 <!doctype html>
 <html>
-<head>
-</head>
-<body>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
-	<button type="button" id="resetButton" class="button">Reset</button>
-	<button type="button" id="undoButton" class="button">Undo</button>
-  <button type="button" id="quitButton" class="quitButton" style = "visibility:hidden">Quit</button>
-    <!--<p> Solution Code: <span id="code"> </span></p>-->
-    <p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
+	<head>
+	</head>
+	<body>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+		<button type="button" id="resetButton" class="button">Reset</button>
+		<button type="button" id="undoButton" class="button">Undo</button>
+		<button type="button" id="giveUpButton" class="button" style="display: none">Give Up</button>
+		<p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
 
-    <div id="finish" class="overlay">
-        <div class="overlay-content">
-            <p>MTurk Token:</p>
-            <p id="code"></p>
-        </div>
-    </div>
+		<div id="finish" class="overlay">
+			<div class="overlay-content">
+				<p id="messageTitle">:</p>
+				<p id="code"></p>
+			</div>
+		</div>
 
-	<script src="{{ url_for('static', filename='game.js') }}"></script>
-</body>
+		<script src="{{ url_for('static', filename='game.js') }}"></script>
+	</body>
 </html>
