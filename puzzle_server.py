@@ -57,7 +57,9 @@ def get_solve_info(solve_id):
 def init_new_solve_info(solve_id, puzzle_id):
     # add an entry to solve_info
     mturk_token = compute_mturk_token(solve_id)
-    query = ("INSERT INTO solve_info (solve_id, puzzle_id, mturk_token) VALUES (%s, %s, %s)" , (solve_id, puzzle_id, mturk_token))
+    #status is 0 - awaiting response
+    status = "0"
+    query = ("INSERT INTO solve_info (solve_id, puzzle_id, mturk_token, status) VALUES (%s, %s, %s, %s)" , (solve_id, puzzle_id, mturk_token, status))
     insert_into_database(query)
 
 # see if an mturk_token corresponds to a log file
@@ -81,6 +83,12 @@ def add_log_file_to_database(solve_id, puzzle_id, log_file):
         insert_into_database(query)
     # then increment num_solves for the puzzle_id
     query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
+    insert_into_database(query)
+
+# update the solve_info table to record the type of response
+# (completed or gave up)
+def update_solve_status(status, solve_id):
+    query = ('UPDATE solve_info SET status = %s WHERE solve_id = %s', (status, solve_id))
     insert_into_database(query)
 
 # serve puzzles to clients
@@ -109,6 +117,7 @@ def put_log_file():
             puzzle_id, mturk_token = solve_info
             add_log_file_to_database(solve_id, puzzle_id, log_file)
             response = {'success': True, 'mturk_token': mturk_token}
+            update_solve_status(status, solve_id)
             return json.dumps(response)
         else:
             response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
@@ -141,6 +150,6 @@ if __name__ == '__main__':
         print(e)
         exit(1)
     host = sys.argv[1]
-    port = sys.argv[2]
+    port = int(sys.argv[2])
     app.run(host=host, port=port)
     connection.close()
