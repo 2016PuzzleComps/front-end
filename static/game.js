@@ -19,9 +19,14 @@ var solveID;
 
 document.getElementById('resetButton').onclick = resetBoard;
 document.getElementById('undoButton').onclick = undoMove;
+document.getElementById('quitButton').onclick = quit;
 
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
+
+function waitToQuit() {
+		setTimeout( "quitButton.style.visibility = 'visible'", 300000 );
+	}
 
 function Board(width, height, exit_offset) {
 	this.width = width;
@@ -139,6 +144,13 @@ function undoMove() {
 	}
 }
 
+function quit() {
+	logMove("Q");
+	openFinish();
+	gameOver = true;
+	submitLog();
+}
+
 // saves a move to the movelist and log
 function saveMove(selectedVehicleIndex, move) {
 	var selectedVehicle = board.vehicles[selectedVehicleIndex];
@@ -214,7 +226,7 @@ function drawFrame() {
 	context.lineTo(clearX + 2, clearY + clearHeight);
 	context.lineTo(clearX + clearWidth, clearY + clearHeight);
 	context.lineTo(clearX + clearWidth, (board.height * squareSize) + (borderWidth * 2));
-    context.lineTo(0, (board.height * squareSize) + (borderWidth * 2)); 
+    context.lineTo(0, (board.height * squareSize) + (borderWidth * 2));
 	context.closePath();
 	context.stroke();
     // draw vehicles //
@@ -466,3 +478,4 @@ function submitLog() {
 }
 
 getPuzzleFile();
+waitToQuit();
