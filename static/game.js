@@ -16,7 +16,7 @@ var moveList = [];
 var currentMove;
 
 var gameOver = false;
-
+var buttonAdded = false;
 var solveID;
 
 // open the win tab
@@ -25,15 +25,23 @@ function openFinish() {
 }
 
 function waitToQuit() {
-    setTimeout(insertButton(), 10000);
+    setTimeout(insertQuitButton, 300000);
+    setInterval(insertQuitButton, 10000);
 }
 
-function insertButton() {
-	var giveUpButton = document.createElement("giveUpButton");
-    var text = document.createTextNode("Give Up");
-    giveUpButton.appendChild(text);
-    document.body.appendChild(giveUpButton);
-
+function insertQuitButton() {
+    console.log("in insert button");
+    if (moveList.length > 50 && !buttonAdded){
+	    var giveUpButton = document.createElement("giveUpButton");
+        var text = document.createTextNode("Give Up");
+        giveUpButton.appendChild(text);
+        giveUpButton.className = "button";
+        giveUpButton.classList.add("giveUpButton");
+        buttonDiv = document.getElementById("buttonsDiv");
+        buttonDiv.appendChild(giveUpButton);
+        giveUpButton.onclick = giveUp;
+        buttonAdded = true;
+    }
 }
 
 getPuzzleFile();
@@ -114,7 +122,7 @@ function loadBoardFromText(text) {
 
 document.getElementById('resetButton').onclick = resetBoard;
 document.getElementById('undoButton').onclick = undoMove;
-document.getElementById('giveUpButton').onclick = giveUp;
+//document.getElementById('giveUpButton').onclick = giveUp;
 
 // Resets the board to the initial state (if there is one)
 function resetBoard() {
