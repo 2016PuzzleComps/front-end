@@ -25,7 +25,15 @@ function openFinish() {
 }
 
 function waitToQuit() {
-	setTimeout("giveUpButton.style.display = 'inline-block'", 300000);
+    setTimeout(insertButton(), 10000);
+}
+
+function insertButton() {
+	var giveUpButton = document.createElement("giveUpButton");
+    var text = document.createTextNode("Give Up");
+    giveUpButton.appendChild(text);
+    document.body.appendChild(giveUpButton);
+
 }
 
 getPuzzleFile();
