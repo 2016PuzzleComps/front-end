@@ -25,12 +25,15 @@ function openFinish() {
 }
 
 function waitToQuit() {
-    setTimeout(insertQuitButton, 300000);
+    setTimeout(tryInsertQuitButton, 300000);
+}
+
+function tryInsertQuitButton(){
     setInterval(insertQuitButton, 10000);
 }
 
 function insertQuitButton() {
-    console.log("in insert button");
+    console.log("In insert quit button");
     if (moveList.length > 50 && !buttonAdded){
 	    var giveUpButton = document.createElement("giveUpButton");
         var text = document.createTextNode("Give Up");
