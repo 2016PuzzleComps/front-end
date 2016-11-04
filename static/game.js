@@ -64,7 +64,7 @@ function getPuzzleFile() {
 			alert(resp.message);
 		}
 	});
-	requester.open("GET", puzzleServerURL + "/puzzle-file");
+	requester.open("GET", puzzleServerURL + "puzzle-file");
 	requester.send(null);
 }
 
@@ -84,7 +84,7 @@ function submitLog(completed) {
 		}
 		openFinish();
 	});
-	req.open("POST", "http://" + puzzleServerURL + "/log-file");
+	req.open("POST", "http://" + puzzleServerURL + "log-file");
 	var status;
 	if(completed) {
 		status = 1;
