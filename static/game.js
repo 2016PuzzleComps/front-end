@@ -1,6 +1,6 @@
 /* GLOBAL VARS */
 
-var puzzleServerURL = 'cmc307-01.mathcs.carleton.edu:5001';
+import 'host.js'
 
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
