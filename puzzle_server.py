@@ -68,15 +68,14 @@ def verify_mturk_token(mturk_token):
     rows = select_from_database(query)
     return rows[0] > 0
 
-# load a solve log file into the DB
-def add_log_file_to_database(solve_id, puzzle_id, log_file):
-    # then add each move in the log to solve_logs
+# load a solve lo  file into the DB
+def submit_log_file(solve_id, puzzle_id, log_file, status):
+    # add each move in the log to solve_logs
     log_file = log_file.strip()
     moves = log_file.split('\n')
     for move_num in range(len(moves)):
         line = moves[move_num]
         split = line.split(' ')
-        print(split)
         timestamp = split[0]
         move = ' '.join(split[1:])
         query = ('INSERT INTO solve_logs VALUES(%s, %s, %s, %s)', (solve_id, move_num, timestamp, move))
@@ -84,12 +83,93 @@ def add_log_file_to_database(solve_id, puzzle_id, log_file):
     # then increment num_solves for the puzzle_id
     query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
     insert_into_database(query)
-
-# update the solve_info table to record the type of response
-# (completed or gave up)
-def update_solve_status(status, solve_id):
+    # update the solve_info table to record the type of response (completed or gave up)
     query = ('UPDATE solve_info SET status = %s WHERE solve_id = %s', (status, solve_id))
     insert_into_database(query)
+
+class Board:
+    class Vehicle:
+        def __init__(self, line):
+			split = line.split(" ")
+            self.x = int(split[0])
+            self.y = int(split[1])
+            self.size = int(split[2])
+            self.is_horiz = split[3] == 'T'
+    def __init__(self, puzzle_file):
+        lines = puzzle_file.split("\n")
+        self.width, self.height = lines[0].split(" ")
+        self.vehicles = []
+        for i in range(len(lines) - 1):
+            self.vehicles.append(Vehicle(lines[i]))
+		self.vip = self.vehicles[0]
+		self.occupied = set()
+		for i in range(self.width):
+			self.occupied.add((i,-1))
+			self.occupied.add((i,self.height))
+		for i in range(self.height):
+			self.occupied.add((-1,i))
+			self.occupied.add((self.width,i))
+		self.occupied.remove((self.width, self.vip.y))
+		for v in self.vehicles:
+			if v.is_horiz:
+				for i in range(v.size):
+					self.occupied.add(v.x + i, v.y)
+			else:
+				for i in range(v.size):
+					self.occupied.add(v.x, v.y + i)
+
+	def move_vehicle(self, vehicle_index, vector):
+		v = self.vehicle[vehicle_index]
+		for i in range(abs(vector)):
+			if not move_vehicle_by_one(v, (vector > 0)):
+				return False
+		return True
+
+	def move_vehicle_by_one(self, v, forward):
+		if v.is_horiz:
+			if forward:
+				if [(v.x + v.size + 1, v.y)] in self.occupied:
+					return False
+				else:
+					self.occupied.remove((v.x, v.y))
+					v.x += 1
+					self.occupied.add((v.x + v.size, v.y))
+			else:
+				if [(v.x - 1, v.y)] in self.occupied:
+					return False
+				else:
+					self.occupied.remove((v.x + v.size, v.y))
+					v.x -= 1
+					self.occupied.add((v.x, v.y))
+		else:
+			if forward:
+				if [(v.x, v.y + v.size + 1)] in self.occupied:
+					return False
+				else:
+					self.occupied.remove((v.x, v.y))
+					v.y += 1
+					self.occupied.add((v.x, v.y + v.size))
+			else:
+				if [(v.x, v.y - 1)] in self.occupied:
+					return False
+				else:
+					self.occupied.remove((v.x, v.y + v.size))
+					v.y -= 1
+					self.occupied.add((v.x, v.y))
+		return True
+
+	def is_solved(self):
+		return self.vip.x + self.vip.size >= self.width
+
+# verify that a log file represents a valid solve
+def solve_log_is_valid(solve_id, log_file):
+    puzzle_file = get_puzzle_file_from_database(solve_id)
+	board = Board(puzzle_file)
+	for move in log_file.split("\n"):
+		_, vehicle_index, vector = move.split(" ")
+		if not board.move_vehicle(vehicle_index, vector):
+			return False
+	return board.is_solved()
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
@@ -109,22 +189,25 @@ def get_puzzle_file():
 def put_log_file():
     request = json.loads(flask.request.data.decode('utf-8'))
     solve_id = request['solve_id']
-    log_file = request['log_file']
     status = request['status']
-    try:
-        solve_info = get_solve_info(solve_id)
-        if solve_info:
-            puzzle_id, mturk_token = solve_info
-            add_log_file_to_database(solve_id, puzzle_id, log_file)
+    solve_info = get_solve_info(solve_id)
+    if solve_info:
+        log_file = request['log_file']
+        puzzle_id, mturk_token = solve_info
+        if status == 1:
+            if not solve_log_is_valid(puzzle_id, log_file):
+                response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
+                return json.dumps(response)
+        try:
+            submit_log_file(solve_id, puzzle_id, log_file, status)
             response = {'success': True, 'mturk_token': mturk_token}
-            update_solve_status(status, solve_id)
             return json.dumps(response)
-        else:
-            response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
-            return json.dumps(response)
-    except DatabaseException:
+        except DatabaseException:
             response = {'success': False, 'message': "Server error; please reload page and cross fingers!"}
             return json.dumps(response)
+    else:
+        response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
+        return json.dumps(response)
 
 def select_from_database(query):
     try:
