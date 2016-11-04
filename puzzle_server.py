@@ -90,7 +90,7 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
 class Board:
     class Vehicle:
         def __init__(self, line):
-			split = line.split(" ")
+            split = line.split(" ")
             self.x = int(split[0])
             self.y = int(split[1])
             self.size = int(split[2])
@@ -101,75 +101,75 @@ class Board:
         self.vehicles = []
         for i in range(len(lines) - 1):
             self.vehicles.append(Vehicle(lines[i]))
-		self.vip = self.vehicles[0]
-		self.occupied = set()
-		for i in range(self.width):
-			self.occupied.add((i,-1))
-			self.occupied.add((i,self.height))
-		for i in range(self.height):
-			self.occupied.add((-1,i))
-			self.occupied.add((self.width,i))
-		self.occupied.remove((self.width, self.vip.y))
-		for v in self.vehicles:
-			if v.is_horiz:
-				for i in range(v.size):
-					self.occupied.add(v.x + i, v.y)
-			else:
-				for i in range(v.size):
-					self.occupied.add(v.x, v.y + i)
+        self.vip = self.vehicles[0]
+        self.occupied = set()
+        for i in range(self.width):
+            self.occupied.add((i,-1))
+            self.occupied.add((i,self.height))
+        for i in range(self.height):
+            self.occupied.add((-1,i))
+            self.occupied.add((self.width,i))
+        self.occupied.remove((self.width, self.vip.y))
+        for v in self.vehicles:
+            if v.is_horiz:
+                for i in range(v.size):
+                    self.occupied.add(v.x + i, v.y)
+            else:
+                for i in range(v.size):
+                    self.occupied.add(v.x, v.y + i)
+    
+    def move_vehicle(self, vehicle_index, vector):
+        v = self.vehicle[vehicle_index]
+        for i in range(abs(vector)):
+            if not move_vehicle_by_one(v, (vector > 0)):
+                return False
+        return True
 
-	def move_vehicle(self, vehicle_index, vector):
-		v = self.vehicle[vehicle_index]
-		for i in range(abs(vector)):
-			if not move_vehicle_by_one(v, (vector > 0)):
-				return False
-		return True
+    def move_vehicle_by_one(self, v, forward):
+        if v.is_horiz:
+            if forward:
+                if [(v.x + v.size + 1, v.y)] in self.occupied:
+                    return False
+                else:
+                    self.occupied.remove((v.x, v.y))
+                    v.x += 1
+                    self.occupied.add((v.x + v.size, v.y))
+            else:
+                if [(v.x - 1, v.y)] in self.occupied:
+                    return False
+                else:
+                    self.occupied.remove((v.x + v.size, v.y))
+                    v.x -= 1
+                    self.occupied.add((v.x, v.y))
+        else:
+            if forward:
+                if [(v.x, v.y + v.size + 1)] in self.occupied:
+                    return False
+                else:
+                    self.occupied.remove((v.x, v.y))
+                    v.y += 1
+                    self.occupied.add((v.x, v.y + v.size))
+            else:
+                if [(v.x, v.y - 1)] in self.occupied:
+                    return False
+                else:
+                    self.occupied.remove((v.x, v.y + v.size))
+                    v.y -= 1
+                    self.occupied.add((v.x, v.y))
+        return True
 
-	def move_vehicle_by_one(self, v, forward):
-		if v.is_horiz:
-			if forward:
-				if [(v.x + v.size + 1, v.y)] in self.occupied:
-					return False
-				else:
-					self.occupied.remove((v.x, v.y))
-					v.x += 1
-					self.occupied.add((v.x + v.size, v.y))
-			else:
-				if [(v.x - 1, v.y)] in self.occupied:
-					return False
-				else:
-					self.occupied.remove((v.x + v.size, v.y))
-					v.x -= 1
-					self.occupied.add((v.x, v.y))
-		else:
-			if forward:
-				if [(v.x, v.y + v.size + 1)] in self.occupied:
-					return False
-				else:
-					self.occupied.remove((v.x, v.y))
-					v.y += 1
-					self.occupied.add((v.x, v.y + v.size))
-			else:
-				if [(v.x, v.y - 1)] in self.occupied:
-					return False
-				else:
-					self.occupied.remove((v.x, v.y + v.size))
-					v.y -= 1
-					self.occupied.add((v.x, v.y))
-		return True
-
-	def is_solved(self):
-		return self.vip.x + self.vip.size >= self.width
+    def is_solved(self):
+        return self.vip.x + self.vip.size >= self.width
 
 # verify that a log file represents a valid solve
 def solve_log_is_valid(solve_id, log_file):
     puzzle_file = get_puzzle_file_from_database(solve_id)
-	board = Board(puzzle_file)
-	for move in log_file.split("\n"):
-		_, vehicle_index, vector = move.split(" ")
-		if not board.move_vehicle(vehicle_index, vector):
-			return False
-	return board.is_solved()
+    board = Board(puzzle_file)
+    for move in log_file.split("\n"):
+        _, vehicle_index, vector = move.split(" ")
+        if not board.move_vehicle(vehicle_index, vector):
+            return False
+    return board.is_solved()
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
