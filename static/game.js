@@ -1,6 +1,6 @@
 /* GLOBAL VARS */
 
-import 'host.js'
+var puzzleServerURL = window.location.href;
 
 var vehicleColor = '#306aad';
 var vipColor = '#b54141';
@@ -64,7 +64,7 @@ function getPuzzleFile() {
 			alert(resp.message);
 		}
 	});
-	requester.open("GET", "http://" + puzzleServerURL + "/puzzle-file");
+	requester.open("GET", puzzleServerURL + "/puzzle-file");
 	requester.send(null);
 }
 
