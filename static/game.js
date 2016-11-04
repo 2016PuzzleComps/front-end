@@ -84,7 +84,7 @@ function submitLog(completed) {
 		}
 		openFinish();
 	});
-	req.open("POST", "http://" + puzzleServerURL + "log-file");
+	req.open("POST", puzzleServerURL + "log-file");
 	var status;
 	if(completed) {
 		status = 1;
