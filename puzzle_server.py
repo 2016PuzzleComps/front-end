@@ -100,7 +100,7 @@ class Board:
         self.width, self.height = lines[0].split(" ")
         self.vehicles = []
         for i in range(len(lines) - 1):
-            self.vehicles.append(Vehicle(lines[i]))
+            self.vehicles.append(self.Vehicle(lines[i]))
         self.vip = self.vehicles[0]
         self.occupied = set()
         for i in range(self.width):
