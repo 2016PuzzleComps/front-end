@@ -81,12 +81,13 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
         move = ' '.join(split[1:])
         query = ('INSERT INTO solve_logs VALUES(%s, %s, %s, %s)', (solve_id, move_num, timestamp, move))
         insert_into_database(query)
-    # then increment num_solves for the puzzle_id
-    query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
-    insert_into_database(query)
     # update the solve_info table to record the type of response (completed or gave up)
     query = ('UPDATE solve_info SET status = %s WHERE solve_id = %s', (status, solve_id))
     insert_into_database(query)
+    # if they solved it, increment num_solves for the puzzle_id
+    if status == 1:
+        query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
+        insert_into_database(query)
 
 # verify that a log file represents a valid solve
 def solve_log_is_valid(solve_id, log_file):

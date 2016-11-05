@@ -73,13 +73,12 @@ class Board:
     def is_solved(self):
         return self.vip.x + self.vip.size >= self.width
 
-# verify that a log file represents a valid solve
-def solve_log_is_valid(puzzle_file, log_file):
-    board = Board(puzzle_file)
-    for move in log_file.split("\n"):
+if __name__ == '__main__':
+    board = Board(open('puzzle.txt').read())
+    for move in open('log.txt'):
         if not move:
             break
         _, vehicle_index, vector = map(int, move.split(" "))
         if not board.move_vehicle(vehicle_index, vector):
             return False
-    return board.is_solved()
+    print(board.is_solved())
