@@ -94,6 +94,8 @@ def solve_log_is_valid(solve_id, log_file):
     puzzle_file = get_puzzle_file_from_database(solve_id)
     board = Board(puzzle_file)
     for move in log_file.split("\n"):
+        if not move:
+            break
         _, vehicle_index, vector = map(int, move.split(" "))
         if not board.move_vehicle(vehicle_index, vector):
             return False
