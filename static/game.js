@@ -45,9 +45,6 @@ function insertQuitButton() {
     }
 }
 
-getPuzzleFile();
-waitToQuit();
-
 /* SERVER STUFF */
 
 // receive puzzle from server
@@ -95,28 +92,6 @@ function submitLog(completed) {
 		status: status
 	};
 	req.send(JSON.stringify(msg));
-}
-
-// Loads a board from a given block of text
-function loadBoardFromText(text) {
-	initialBoard = text;
-	var lines = text.split("\n");
-	var dimen = lines[0].split(" ");
-	var exitOffset = parseInt(lines[1].split(" ")[1]);
-	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
-	var isFirst = true;
-	for (var i=1; i<lines.length; i++) {
-		var items = lines[i].split(" ");
-		if (items.length != 4) {
-			break;
-		}
-		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
-		board.addVehicle(newVehicle);
-		if (isFirst) {
-			isFirst = false;
-		}
-	}
-	drawFrame();
 }
 
 /* BUTTON STUFF */
@@ -285,6 +260,31 @@ function drawFrame() {
 		drawVehicle(board.vehicles[i]);
 	}
 }
+
+/* I DON'T THINK THERE'S A CATEGORY FOR THIS */
+
+// Loads a board from a given block of text
+function loadBoardFromText(text) {
+	initialBoard = text;
+	var lines = text.split("\n");
+	var dimen = lines[0].split(" ");
+	var exitOffset = parseInt(lines[1].split(" ")[1]);
+	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
+	var isFirst = true;
+	for (var i=1; i<lines.length; i++) {
+		var items = lines[i].split(" ");
+		if (items.length != 4) {
+			break;
+		}
+		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
+		board.addVehicle(newVehicle);
+		if (isFirst) {
+			isFirst = false;
+		}
+	}
+	drawFrame();
+}
+
 
 /* LOGGING STUFF */
 
@@ -513,3 +513,8 @@ document.body.addEventListener("touchmove", function (e) {
 		e.preventDefault();
 	}
 }, false);
+
+// DO THE STUFF
+
+getPuzzleFile();
+waitToQuit();
