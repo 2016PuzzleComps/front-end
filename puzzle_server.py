@@ -127,22 +127,21 @@ def put_log_file():
         puzzle_id, mturk_token = solve_info
         # see if they solved it
         if status == 1:
-            if not solve_log_is_valid(puzzle_id, log_file):
+            if solve_log_is_valid(puzzle_id, log_file):
+                response = {'success': True, 'mturk_token': mturk_token}
+            else:
                 response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
-                return json.dumps(response)
-            response = {'success': True, 'mturk_token': mturk_token}
         else:
             response = {'success': True}
+        # put log file in database
+        try:
+            submit_log_file(solve_id, puzzle_id, log_file, status)
+        except DatabaseException:
+            response = {'success': False, 'message': "Server error; please reload page and cross fingers!"}
     else:
         response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
-        return json.dumps(response)
     # send response
-    try:
-        submit_log_file(solve_id, puzzle_id, log_file, status)
-        return json.dumps(response)
-    except DatabaseException:
-        response = {'success': False, 'message': "Server error; please reload page and cross fingers!"}
-        return json.dumps(response)
+    return json.dumps(response)
 
 def select_from_database(query):
     try:
