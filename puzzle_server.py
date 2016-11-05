@@ -121,22 +121,27 @@ def put_log_file():
     solve_id = request['solve_id']
     status = request['status']
     solve_info = get_solve_info(solve_id)
+    # see if they send a valid solve_id
     if solve_info:
         log_file = request['log_file']
         puzzle_id, mturk_token = solve_info
-        if status != 2:
+        # see if they solved it
+        if status == 1:
             if not solve_log_is_valid(puzzle_id, log_file):
                 response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
                 return json.dumps(response)
-        try:
-            submit_log_file(solve_id, puzzle_id, log_file, status)
             response = {'success': True, 'mturk_token': mturk_token}
-            return json.dumps(response)
-        except DatabaseException:
-            response = {'success': False, 'message': "Server error; please reload page and cross fingers!"}
-            return json.dumps(response)
+        else:
+            response = {'success': True}
     else:
         response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
+        return json.dumps(response)
+    # send response
+    try:
+        submit_log_file(solve_id, puzzle_id, log_file, status)
+        return json.dumps(response)
+    except DatabaseException:
+        response = {'success': False, 'message': "Server error; please reload page and cross fingers!"}
         return json.dumps(response)
 
 def select_from_database(query):

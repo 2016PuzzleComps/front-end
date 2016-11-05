@@ -69,10 +69,14 @@ function submitLog(completed) {
 	req.addEventListener('load', function() {
 		var resp = JSON.parse(this.responseText);
 		if(resp.success) {
-			// Display to the user the token for input into MTurk
-			MTurkToken = resp.mturk_token;
-			document.getElementById("messageTitle").innerHTML = "MTurk Token: ";
-			document.getElementById("code").innerHTML = MTurkToken;
+			if(resp.mturk_token) {
+				// display the MTurk token
+				document.getElementById("messageTitle").innerHTML = "MTurk Token: ";
+				document.getElementById("code").innerHTML = resp.mturk_token;
+			} else {
+				// display the message
+				document.getElementById("messageTitle").innerHTML = "Better luck next time!";
+			}
 		} else {
 			document.getElementById("messageTitle").innerHTML = "Oops... ";
 			document.getElementById("code").innerHTML = resp.message;
