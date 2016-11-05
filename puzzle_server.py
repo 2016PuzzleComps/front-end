@@ -15,6 +15,10 @@ class DatabaseException(Exception):
 def get_index():
     return flask.render_template('index.html')
 
+@app.route('/tutorial')
+def get_tutorial():
+    return flask.render_template('tutorial.html')
+
 # compute the MTurk Token for a solve
 def compute_mturk_token(solve_id):
     m = hashlib.md5()

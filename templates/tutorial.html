@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Example tutorial whatcha doohickey</title>
+        
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='introjs.min.css') }}"/>
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+    </head>
+    
+	<body>
+        <div id="buttonsDiv">
+            <button type="button" id="resetButton" class="button">Reset</button>
+		    <button type="button" id="undoButton" class="button">Undo</button>
+            <button type="button" id="giveUpButton" class="button" style="display: none">Give Up</button>
+        </div>
+		<p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
+
+		<div id="finish" class="overlay">
+			<div class="overlay-content">
+				<p id="messageTitle">:</p>
+				<p id="code"></p>
+			</div>
+		</div>
+
+        <script src="{{ url_for('static', filename='tutorial.js') }}"></script>
+	</body>
+</html>
