@@ -124,7 +124,7 @@ def put_log_file():
     if solve_info:
         log_file = request['log_file']
         puzzle_id, mturk_token = solve_info
-        if status == 1:
+        if status != 2:
             if not solve_log_is_valid(puzzle_id, log_file):
                 response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
                 return json.dumps(response)
