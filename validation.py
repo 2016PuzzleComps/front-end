@@ -80,5 +80,5 @@ if __name__ == '__main__':
             break
         _, vehicle_index, vector = map(int, move.split(" "))
         if not board.move_vehicle(vehicle_index, vector):
-            return False
+            print("False")
     print(board.is_solved())
