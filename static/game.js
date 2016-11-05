@@ -59,7 +59,7 @@ function getPuzzleFile() {
 			alert(resp.message);
 		}
 	});
-	requester.open("GET", "http://" + window.location.hostname + window.location.port + "/puzzle-file");
+	requester.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
 	requester.send(null);
 }
 
@@ -79,7 +79,7 @@ function submitLog(completed) {
 		}
 		openFinish();
 	});
-	req.open("POST", "http://" + window.location.hostname + window.location.port + "/log-file");
+	req.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
 	var status;
 	if(completed) {
 		status = 1;
