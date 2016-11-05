@@ -5,6 +5,7 @@ import json
 import config1 as config
 import hashlib
 import time
+from validation import *
 
 app = flask.Flask(__name__)
 
@@ -86,80 +87,6 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
     # update the solve_info table to record the type of response (completed or gave up)
     query = ('UPDATE solve_info SET status = %s WHERE solve_id = %s', (status, solve_id))
     insert_into_database(query)
-
-class Board:
-    class Vehicle:
-        def __init__(self, line):
-            split = line.split(" ")
-            self.x = int(split[0])
-            self.y = int(split[1])
-            self.size = int(split[2])
-            self.is_horiz = split[3] == 'T'
-    def __init__(self, puzzle_file):
-        lines = puzzle_file.split("\n")
-        self.width, self.height = lines[0].split(" ")
-        self.vehicles = []
-        for i in range(len(lines) - 1):
-            self.vehicles.append(self.Vehicle(lines[i]))
-        self.vip = self.vehicles[0]
-        self.occupied = set()
-        for i in range(self.width):
-            self.occupied.add((i,-1))
-            self.occupied.add((i,self.height))
-        for i in range(self.height):
-            self.occupied.add((-1,i))
-            self.occupied.add((self.width,i))
-        self.occupied.remove((self.width, self.vip.y))
-        for v in self.vehicles:
-            if v.is_horiz:
-                for i in range(v.size):
-                    self.occupied.add(v.x + i, v.y)
-            else:
-                for i in range(v.size):
-                    self.occupied.add(v.x, v.y + i)
-    
-    def move_vehicle(self, vehicle_index, vector):
-        v = self.vehicle[vehicle_index]
-        for i in range(abs(vector)):
-            if not move_vehicle_by_one(v, (vector > 0)):
-                return False
-        return True
-
-    def move_vehicle_by_one(self, v, forward):
-        if v.is_horiz:
-            if forward:
-                if [(v.x + v.size + 1, v.y)] in self.occupied:
-                    return False
-                else:
-                    self.occupied.remove((v.x, v.y))
-                    v.x += 1
-                    self.occupied.add((v.x + v.size, v.y))
-            else:
-                if [(v.x - 1, v.y)] in self.occupied:
-                    return False
-                else:
-                    self.occupied.remove((v.x + v.size, v.y))
-                    v.x -= 1
-                    self.occupied.add((v.x, v.y))
-        else:
-            if forward:
-                if [(v.x, v.y + v.size + 1)] in self.occupied:
-                    return False
-                else:
-                    self.occupied.remove((v.x, v.y))
-                    v.y += 1
-                    self.occupied.add((v.x, v.y + v.size))
-            else:
-                if [(v.x, v.y - 1)] in self.occupied:
-                    return False
-                else:
-                    self.occupied.remove((v.x, v.y + v.size))
-                    v.y -= 1
-                    self.occupied.add((v.x, v.y))
-        return True
-
-    def is_solved(self):
-        return self.vip.x + self.vip.size >= self.width
 
 # verify that a log file represents a valid solve
 def solve_log_is_valid(solve_id, log_file):
