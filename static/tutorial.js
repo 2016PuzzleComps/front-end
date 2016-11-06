@@ -28,9 +28,16 @@ var gameOver = false;
 var buttonAdded = false;
 var solveID;
 
-// open the win tab
+// open the win tab, specialized for the tutorial so you can close it.
 function openFinish() {
+    document.getElementById("messageTitle").innerHTML = "You've Won!";
+    document.getElementById("code").innerHTML = "Your token would be displayed here";
 	document.getElementById("finish").style.height = "100%";
+}
+
+function closeFinish() {
+    resetBoard();
+    document.getElementById("finish").style.height = "0%";
 }
 
 function waitToQuit() {
@@ -42,16 +49,12 @@ function tryInsertQuitButton(){
 }
 
 function insertQuitButton() {
-    console.log("In insert quit button");
-    if (moveList.length > 50 && !buttonAdded){
-	    var giveUpButton = document.createElement("giveUpButton");
-        var text = document.createTextNode("Give Up");
-        giveUpButton.appendChild(text);
-        giveUpButton.className = "button";
+    if (!buttonAdded){
+	    var giveUpButton = document.getElementById("giveUpButton");
+        giveUpButton.style.visibility="visible";
         giveUpButton.classList.add("giveUpButton");
         buttonDiv = document.getElementById("buttonsDiv");
         buttonDiv.appendChild(giveUpButton);
-        giveUpButton.onclick = giveUp;
         buttonAdded = true;
     }
 }
@@ -463,7 +466,7 @@ function deselectVehicle(evt) {
 			openFinish();
 			selectedVehicle.x = board.width + 1;
 			drawFrame();
-			gameOver = true;
+			//gameOver = true;
 			submitLog(true);
 		}
 		// deselect vehicle
