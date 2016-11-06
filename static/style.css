@@ -55,6 +55,15 @@ body {
     margin-top: 30px;
 }
 
+.overlay p {
+    padding: 8px;
+    text-decoration: none;
+    font-size: 36px;
+    color: #c1c1c1;
+    display: block;
+    transition: 0.3s;
+}
+
 .overlay a {
     padding: 8px;
     text-decoration: none;
