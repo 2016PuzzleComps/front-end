@@ -10,11 +10,12 @@
     
 	<body>
         <div id="buttonsDiv">
-            <button type="button" id="resetButton" class="button">Reset</button>
-		    <button type="button" id="undoButton" class="button">Undo</button>
+            <a class="button" href="javascript:void(0);" onclick="javascript:startIntro();">Show me how</a>
+            <button type="button" id="resetButton" class="button" data-step="2" data-intro="Blob">Reset</button>
+		    <button type="button" id="undoButton" class="button" data-step="1" data-intro="first">Undo</button>
             <button type="button" id="giveUpButton" class="button" style="display: none">Give Up</button>
         </div>
-		<p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
+		<p><canvas id="gameCanvas" width="662" height="660"> </canvas></p>
 
 		<div id="finish" class="overlay">
 			<div class="overlay-content">
@@ -23,6 +24,8 @@
 			</div>
 		</div>
 
+        <script src="{{ url_for('static', filename='intro.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='tutorialintro.js') }}"></script>
         <script src="{{ url_for('static', filename='tutorial.js') }}"></script>
 	</body>
 </html>

@@ -19,11 +19,7 @@ var initialBoard = '6 6\n'+
 '2 4 2 T\n'+
 '2 5 3 T\n'+
 '3 0 3 T\n'+
-'3 1 2 F\n'+
-'4 1 2 T\n'+
-'4 2 3 F\n'+
-'5 2 2 F\n'+
-'5 4 2 F';
+'3 1 2 F';
 var log = "";
 var moveList = [];
 var currentMove;
@@ -65,6 +61,7 @@ function insertQuitButton() {
 // receive puzzle from server
 function getPuzzleFile() {
     loadBoardFromText(initialBoard);
+    startIntro();
     // Don't need this in the tutorial...
 }
 
@@ -494,4 +491,3 @@ document.body.addEventListener("touchmove", function (e) {
 
 getPuzzleFile();
 waitToQuit();
-
