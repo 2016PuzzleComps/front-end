@@ -19,7 +19,9 @@ var fiveMinutes = false;
 var solveID;
 
 // open the win tab
-function openFinish() {
+function openFinish(title, body) {
+	document.getElementById("title").innerHTML = title;
+	document.getElementById("body").innerHTML = body;
 	document.getElementById("finish").style.height = "100%";
 }
 
@@ -64,27 +66,38 @@ function getPuzzleFile() {
 // submit solve log to server
 function submitLog(completed) {
 	var oReq = new XMLHttpRequest();
-	// on successful submission
+	// on successful response
 	oReq.addEventListener('load', function() {
-		var resp = JSON.parse(this.responseText);
-		if(resp.success) {
-			if(resp.mturk_token) {
-				// display the MTurk token
-				document.getElementById("messageTitle").innerHTML = "MTurk Token: ";
-				document.getElementById("code").innerHTML = resp.mturk_token;
+		var title;
+		var body;
+		if(this.status == 200) {
+			var resp = JSON.parse(this.responseText);
+			if(resp.success) {
+				if(resp.mturk_token) {
+					// if they solved it
+					title = "Success! Here's your MTurk token: ";
+					body = resp.mturk_token;
+				} else {
+					// if they gave up
+					title = "Better luck next time!";
+					body = "";
+				}
 			} else {
-				// display the message
-				document.getElementById("messageTitle").innerHTML = "Better luck next time!";
+				// if they tried to cheat
+				title = "Oops... ";
+				body = resp.message;
 			}
 		} else {
-			document.getElementById("messageTitle").innerHTML = "Oops... ";
-			document.getElementById("code").innerHTML = resp.message;
+			// if something went wrong on the server
+			title = "Uh oh...";
+			body = this.statusText;
 		}
-		openFinish();
+		openFinish(title, body);
 	});
-	// on unsuccessful submission
+	// on connection error
 	oReq.addEventListener('error', function() {
-		console.log(this);
+		console.log('error');
+		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
 	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
 	var status;
