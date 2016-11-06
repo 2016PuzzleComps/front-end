@@ -16,6 +16,8 @@ var currentMove;
 var gameOver = false;
 var buttonAdded = false;
 var fiveMinutes = false;
+var numMoves = 0;
+
 var solveID;
 
 // open the win tab
@@ -26,23 +28,21 @@ function openFinish(title, body) {
 }
 
 function waitToQuit() {
-    setTimeout(function(){ 
-                fiveMinutes = true; 
-                }, 300000);
+	setTimeout(function() { 
+		fiveMinutes = true; 
+	}, 300000);
 }
 
 function insertQuitButton() {
-    if (!buttonAdded && fiveMinutes){
-	    var giveUpButton = document.createElement("giveUpButton");
-        var text = document.createTextNode("Give Up");
-        giveUpButton.appendChild(text);
-        giveUpButton.className = "button";
-        giveUpButton.classList.add("giveUpButton");
-        buttonDiv = document.getElementById("buttonsDiv");
-        buttonDiv.appendChild(giveUpButton);
-        giveUpButton.onclick = giveUp;
-        buttonAdded = true;
-    }
+	var giveUpButton = document.createElement("giveUpButton");
+	var text = document.createTextNode("Give Up");
+	giveUpButton.appendChild(text);
+	giveUpButton.className = "button";
+	giveUpButton.classList.add("giveUpButton");
+	buttonDiv = document.getElementById("buttonsDiv");
+	buttonDiv.appendChild(giveUpButton);
+	giveUpButton.onclick = giveUp;
+	buttonAdded = true;
 }
 
 /* SERVER STUFF */
@@ -118,7 +118,6 @@ function submitLog(completed) {
 
 document.getElementById('resetButton').onclick = resetBoard;
 document.getElementById('undoButton').onclick = undoMove;
-//document.getElementById('giveUpButton').onclick = giveUp;
 
 // Resets the board to the initial state (if there is one)
 function resetBoard() {
@@ -334,7 +333,10 @@ function saveMove(selectedVehicleIndex, move) {
 // saves a move to the log with a timestamp
 function logMove(moveString) {
 	log += Date.now() + " " + moveString + "\n";
-    insertQuitButton();
+	numMoves++;
+    if (!buttonAdded && numMoves > 50 && fiveMinutes) {
+		insertQuitButton();
+	}
 }
 
 /* MOUSE/TOUCH EVENT STUFF */
