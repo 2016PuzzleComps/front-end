@@ -90,7 +90,7 @@ function submitLog(completed) {
 				body = resp.message;
 			}
 		} else {
-			// if something wend wrong on the server
+			// if something went wrong on the server
 			title = "Uh oh...";
 			body = this.statusText;
 		}
@@ -98,6 +98,7 @@ function submitLog(completed) {
 	});
 	// on connection error
 	oReq.addEventListener('error', function() {
+		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
 	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
