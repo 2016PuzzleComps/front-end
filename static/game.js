@@ -49,8 +49,8 @@ function insertQuitButton() {
 
 // receive puzzle from server
 function getPuzzleFile() {
-	var requester = new XMLHttpRequest();
-	requester.addEventListener('load', function() {
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			solveID = resp.solve_id;
@@ -59,14 +59,15 @@ function getPuzzleFile() {
 			alert(resp.message);
 		}
 	});
-	requester.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
-	requester.send(null);
+	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
+	oReq.send(null);
 }
 
 // submit solve log to server
 function submitLog(completed) {
-	var req = new XMLHttpRequest();
-	req.addEventListener('load', function() {
+	var oReq = new XMLHttpRequest();
+	// on successful submission
+	oReq.addEventListener('load', function() {
 		var resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			if(resp.mturk_token) {
@@ -83,7 +84,11 @@ function submitLog(completed) {
 		}
 		openFinish();
 	});
-	req.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
+	// on unsuccessful submission
+	oReq.addEventListener('error', function() {
+		console.log(this);
+	});
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
 	var status;
 	if(completed) {
 		status = 1;
@@ -95,7 +100,7 @@ function submitLog(completed) {
 		log_file: log,
 		status: status
 	};
-	req.send(JSON.stringify(msg));
+	oReq.send(JSON.stringify(msg));
 }
 
 /* BUTTON STUFF */
