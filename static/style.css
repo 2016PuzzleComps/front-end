@@ -56,23 +56,23 @@ body {
 }
 
 
-.overlay a, .overlay p {
+.overlay p {
     padding: 8px;
     text-decoration: none;
     font-size: 36px;
-    color: #c1c1c1;
+    color: white;
     display: block;
     transition: 0.3s;
 }
 
-.overlay a:hover, .overlay a:focus {
-    color: #f1f1f1;
+.overlay p:hover, .overlay p:focus {
+    color: #c1c1c1;
 }
 
 .overlay .closebtn {
     position: absolute;
     cursor: pointer;
-    top: 20px;
+    top: 0px;
     right: 45px;
     font-size: 60px;
 }
