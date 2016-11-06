@@ -15,6 +15,7 @@ var currentMove;
 
 var gameOver = false;
 var buttonAdded = false;
+var fiveMinutes = false;
 var solveID;
 
 // open the win tab
@@ -23,16 +24,13 @@ function openFinish() {
 }
 
 function waitToQuit() {
-    setTimeout(tryInsertQuitButton, 300000);
-}
-
-function tryInsertQuitButton(){
-    setInterval(insertQuitButton, 10000);
+    setTimeout(function(){ 
+                fiveMinutes = true; 
+                }, 300000);
 }
 
 function insertQuitButton() {
-    console.log("In insert quit button");
-    if (moveList.length > 50 && !buttonAdded){
+    if (!buttonAdded && fiveMinutes){
 	    var giveUpButton = document.createElement("giveUpButton");
         var text = document.createTextNode("Give Up");
         giveUpButton.appendChild(text);
@@ -49,8 +47,8 @@ function insertQuitButton() {
 
 // receive puzzle from server
 function getPuzzleFile() {
-	var requester = new XMLHttpRequest();
-	requester.addEventListener('load', function() {
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			solveID = resp.solve_id;
@@ -59,14 +57,15 @@ function getPuzzleFile() {
 			alert(resp.message);
 		}
 	});
-	requester.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
-	requester.send(null);
+	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
+	oReq.send(null);
 }
 
 // submit solve log to server
 function submitLog(completed) {
-	var req = new XMLHttpRequest();
-	req.addEventListener('load', function() {
+	var oReq = new XMLHttpRequest();
+	// on successful submission
+	oReq.addEventListener('load', function() {
 		var resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			if(resp.mturk_token) {
@@ -83,7 +82,11 @@ function submitLog(completed) {
 		}
 		openFinish();
 	});
-	req.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
+	// on unsuccessful submission
+	oReq.addEventListener('error', function() {
+		console.log(this);
+	});
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
 	var status;
 	if(completed) {
 		status = 1;
@@ -95,7 +98,7 @@ function submitLog(completed) {
 		log_file: log,
 		status: status
 	};
-	req.send(JSON.stringify(msg));
+	oReq.send(JSON.stringify(msg));
 }
 
 /* BUTTON STUFF */
@@ -318,6 +321,7 @@ function saveMove(selectedVehicleIndex, move) {
 // saves a move to the log with a timestamp
 function logMove(moveString) {
 	log += Date.now() + " " + moveString + "\n";
+    insertQuitButton();
 }
 
 /* MOUSE/TOUCH EVENT STUFF */
