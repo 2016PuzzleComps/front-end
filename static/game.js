@@ -15,6 +15,7 @@ var currentMove;
 
 var gameOver = false;
 var buttonAdded = false;
+var fiveMinutes = false;
 var solveID;
 
 // open the win tab
@@ -23,16 +24,13 @@ function openFinish() {
 }
 
 function waitToQuit() {
-    setTimeout(tryInsertQuitButton, 300000);
-}
-
-function tryInsertQuitButton(){
-    setInterval(insertQuitButton, 10000);
+    setTimeout(function(){ 
+                fiveMinutes = true; 
+                }, 300000);
 }
 
 function insertQuitButton() {
-    console.log("In insert quit button");
-    if (moveList.length > 50 && !buttonAdded){
+    if (!buttonAdded && fiveMinutes){
 	    var giveUpButton = document.createElement("giveUpButton");
         var text = document.createTextNode("Give Up");
         giveUpButton.appendChild(text);
@@ -318,6 +316,7 @@ function saveMove(selectedVehicleIndex, move) {
 // saves a move to the log with a timestamp
 function logMove(moveString) {
 	log += Date.now() + " " + moveString + "\n";
+    insertQuitButton();
 }
 
 /* MOUSE/TOUCH EVENT STUFF */
