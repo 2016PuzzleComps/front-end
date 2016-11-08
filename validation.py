@@ -35,8 +35,6 @@ class Board:
                     self.occupied.add((v.x, v.y + j))
     
     def move_vehicle(self, vehicle_index, vector):
-        self.show()
-        print("move vehicle %d by %d" % (vehicle_index, vector))
         v = self.vehicles[vehicle_index]
         if v.is_horiz:
             h = 'T'
