@@ -10,8 +10,12 @@ class Board:
         lines = puzzle_file.split("\n")
         self.width, self.height = map(int, lines[0].split(" "))
         self.vehicles = []
-        for i in range(len(lines) - 2):
-            self.vehicles.append(self.Vehicle(lines[i+1]))
+        for i in range(1, len(lines)):
+            line = lines[i]
+            if line:
+                self.vehicles.append(self.Vehicle(line))
+            else:
+                break
         self.vip = self.vehicles[0]
         self.occupied = set()
         for i in range(self.width):
@@ -31,6 +35,14 @@ class Board:
                     self.occupied.add((v.x, v.y + j))
     
     def move_vehicle(self, vehicle_index, vector):
+        self.show()
+        print("move vehicle %d by %d" % (vehicle_index, vector))
+        v = self.vehicles[vehicle_index]
+        if v.is_horiz:
+            h = 'T'
+        else:
+            h = 'F'
+        print("(%d, %d, %s, %d)" % (v.x, v.y, h, v.size))
         for i in range(abs(vector)):
             if not self.move_vehicle_by_one(vehicle_index, (vector > 0)):
                 return False
@@ -51,7 +63,7 @@ class Board:
                     return False
                 else:
                     self.occupied.remove((v.x + v.size - 1, v.y))
-                    self.occupied.add((v.x, v.y))
+                    self.occupied.add((v.x - 1, v.y))
                     v.x -= 1
         else:
             if forward:
@@ -66,9 +78,20 @@ class Board:
                     return False
                 else:
                     self.occupied.remove((v.x, v.y + v.size - 1))
-                    self.occupied.add((v.x, v.y))
+                    self.occupied.add((v.x, v.y - 1))
                     v.y -= 1
         return True
+    
+    def show(self):
+        print(' 012345')
+        for y in range(self.height):
+            print(y, end='')
+            for x in range(self.width):
+                if (x,y) in self.occupied:
+                    print('X', end='')
+                else:
+                    print(' ', end='')
+            print('')
 
     def is_solved(self):
         return self.vip.x + self.vip.size >= self.width
