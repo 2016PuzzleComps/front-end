@@ -96,20 +96,33 @@ def solve_log_is_valid(solve_id, log_file):
     board = Board(puzzle_file)
     vehicle_index = 0
     vector = 0
-    for move in log_file.split("\n"):
-        if not move:
-            break
-        if move == 'R':
-            board = Board(puzzle_file)
-            continue
-        elif move == 'U':
-            board.move_vehicle(vehicle_index, -1 * vector)
-            continue
-        else:
-            _, vehicle_index, vector = map(int, move.split(" "))
-            if not board.move_vehicle(vehicle_index, vector):
+    prev_timestamp = 0
+    try:
+        for move in log_file.split('\n'):
+            if not move:
+                break
+            move = move.split(' ')
+            timestamp = int(move[0])
+            if not timestamp > prev_timestamp:
                 return False
-    return board.is_solved()
+            prev_timestamp = timestamp
+            if len(move) == 2:
+                if move[1] == 'R':
+                    board = Board(puzzle_file)
+                elif move[1] == 'U':
+                    board.move_vehicle(vehicle_index, -1 * vector)
+                else:
+                    return False
+            elif len(move) == 3:
+                vehicle_index = int(move[1])
+                vector = int(move[2])
+                if not board.move_vehicle(vehicle_index, vector):
+                    return False
+            else:
+                return False
+        return board.is_solved()
+    except:
+        return False
 
 # serve puzzles to clients
 @app.route('/puzzle-file', methods=['GET'])
