@@ -94,12 +94,21 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
 def solve_log_is_valid(solve_id, log_file):
     puzzle_file = get_puzzle_file_from_database(solve_id)
     board = Board(puzzle_file)
+    vehicle_index = 0
+    vector = 0
     for move in log_file.split("\n"):
         if not move:
             break
-        _, vehicle_index, vector = map(int, move.split(" "))
-        if not board.move_vehicle(vehicle_index, vector):
-            return False
+        if move == 'R':
+            board = Board(puzzle_file)
+            continue
+        elif move == 'U':
+            board.move_vehicle(vehicle_index, -1 * vector)
+            continue
+        else:
+            _, vehicle_index, vector = map(int, move.split(" "))
+            if not board.move_vehicle(vehicle_index, vector):
+                return False
     return board.is_solved()
 
 # serve puzzles to clients
