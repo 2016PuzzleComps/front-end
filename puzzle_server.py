@@ -136,7 +136,7 @@ def put_log_file():
             submit_log_file(solve_id, puzzle_id, log_file, status)
         else:
             response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
-    except json.decoder.JSONDecoderError:
+    except json.decoder.JSONDecodeError:
         response = {'success': False, 'message': "Invalid JSON! What are you up to..."}
     # send response
     return json.dumps(response)
