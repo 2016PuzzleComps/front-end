@@ -412,7 +412,7 @@ function moveVehicleTo(vehicle, pos) {
 // start moving a vehicle
 function selectVehicle(pos) {
 	// if puzzle is loaded
-	if(gameOver || !board) {
+	if(gameOver || !board || selectedVehicleIndex != null) {
 		return;
 	}
 	// find if pos is over a vehicle on the board
