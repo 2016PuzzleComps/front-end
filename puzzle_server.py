@@ -91,7 +91,7 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
         insert_into_database(query)
 
 # verify that a log file represents a valid solve
-def solve_log_is_valid(solve_id, log_file):
+def solve_log_is_valid(solve_id, log_file, status):
     puzzle_file = get_puzzle_file_from_database(solve_id)
     board = Board(puzzle_file)
     vehicle_index = 0
@@ -120,7 +120,10 @@ def solve_log_is_valid(solve_id, log_file):
                     return False
             else:
                 return False
-        return board.is_solved()
+        if status == 1:
+            return board.is_solved()
+        else:
+            return True
     except:
         return False
 
@@ -146,16 +149,16 @@ def put_log_file():
         if solve_info:
             log_file = request['log_file']
             puzzle_id, mturk_token = solve_info
-            # see if they solved it
-            if status == 1:
-                if solve_log_is_valid(puzzle_id, log_file):
+            # see if the log is valid in light of whether or not they purport to have solved it
+            if solve_log_is_valid(puzzle_id, log_file, status):
+                if status == 1:
                     response = {'success': True, 'mturk_token': mturk_token}
                 else:
-                    response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
+                    response = {'success': True}
+                # put log file in database
+                submit_log_file(solve_id, puzzle_id, log_file, status)
             else:
-                response = {'success': True}
-            # put log file in database
-            submit_log_file(solve_id, puzzle_id, log_file, status)
+                response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
         else:
             response = {'success': False, 'message': "Invalid solve_id! You sly dog..."}
     except json.decoder.JSONDecodeError:
