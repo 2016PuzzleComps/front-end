@@ -451,12 +451,12 @@ function moveVehicle(pos) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
-			// check other vehicles
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
-				var testX = Math.floor(selectedVehicle.x) - 1;
-				if(newX - 1 <= testX && board.occupied[testX][selectedVehicle.y]) {
-					newX = testX + 1;
+				for(var testX = Math.floor(selectedVehicle.x) - 1; textX >= Math.floor(newX); testX--) {
+					if(board.occupied[testX][selectedVehicle.y]) {
+						newX = testX + 1;
+					}
 				}
 			} else {
 				// if it's being dragged to the right
