@@ -453,7 +453,7 @@ function moveVehicle(pos) {
 			var newX = (pos.x - mouseOffset) / squareSize;
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
-				for(var testX = Math.floor(selectedVehicle.x) - 1; textX >= Math.floor(newX); testX--) {
+				for(var testX = Math.floor(selectedVehicle.x) - 1; testX >= Math.floor(newX); testX--) {
 					if(board.occupied[testX][selectedVehicle.y]) {
 						newX = testX + 1;
 					}
