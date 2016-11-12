@@ -451,12 +451,13 @@ function moveVehicle(pos) {
 		var selectedVehicle = board.vehicles[selectedVehicleIndex];
 		if(selectedVehicle.horiz) {
 			var newX = (pos.x - mouseOffset) / squareSize;
-			// check other vehicles
 			if(newX < selectedVehicle.x) {
 				// if it's being dragged to the left
-				var testX = Math.floor(selectedVehicle.x) - 1;
-				if(newX - 1 <= testX && board.occupied[testX][selectedVehicle.y]) {
-					newX = testX + 1;
+				for(var testX = Math.floor(selectedVehicle.x) - 1; testX >= Math.floor(newX); testX--) {
+					if(board.occupied[testX][selectedVehicle.y]) {
+						newX = testX + 1;
+						break;
+					}
 				}
                 if (board.occupied[Math.floor(newX)][selectedVehicle.y]) {
                     console.log("hes cheating left");
@@ -466,9 +467,11 @@ function moveVehicle(pos) {
                 drawFrame();
 			} else {
 				// if it's being dragged to the right
-				var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size;
-				if(newX + selectedVehicle.size >= testX && board.occupied[testX][selectedVehicle.y]) {
-					newX = testX - selectedVehicle.size;
+				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX) + selectedVehicle.size - 1; testX++) {
+					if(board.occupied[testX][selectedVehicle.y]) {
+						newX = testX - selectedVehicle.size;
+						break;
+					}
 				}
                 if (board.occupied[Math.floor(newX)][selectedVehicle.y]) {
                     console.log("hes cheating right");
@@ -484,10 +487,11 @@ function moveVehicle(pos) {
 			// check other vehicles
 			if(newY < selectedVehicle.y) {
 				// if it's being dragged up
-				// see if next square up is occupied
-				var testY = Math.floor(selectedVehicle.y) - 1;
-				if(newY - 1 <= testY && board.occupied[selectedVehicle.x][testY]) {
-					newY = testY + 1;
+				for(var testY = Math.floor(selectedVehicle.y) - 1; testY >= Math.floor(newY); testY--) {
+					if(board.occupied[selectedVehicle.x][testY]) {
+						newY = testY + 1;
+						break;
+					}
 				}
                 if(board.occupied[selectedVehicle.x][Math.floor(newY)]) {
                     console.log("hes cheating up");
@@ -497,10 +501,11 @@ function moveVehicle(pos) {
                 drawFrame();
 			} else {
 				// if it's being dragged down
-				// see if next square down is occupied
-				var testY = Math.ceil(selectedVehicle.y) + selectedVehicle.size;
-				if(newY + selectedVehicle.size >= testY && board.occupied[selectedVehicle.x][testY]) {
-					newY = testY - selectedVehicle.size;
+				for(var testY = Math.ceil(selectedVehicle.y) + selectedVehicle.size; testY <= Math.ceil(newY) + selectedVehicle.size - 1; testY++) {
+					if(board.occupied[selectedVehicle.x][testY]) {
+						newY = testY - selectedVehicle.size;
+						break;
+					}
 				}
                 if(board.occupied[selectedVehicle.x][Math.floor(newY)]) {
                     console.log("hes cheating down");
