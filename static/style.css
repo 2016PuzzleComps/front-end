@@ -12,6 +12,7 @@ body {
     text-decoration: none;
     display: inline-block;
 	outline: none;
+    font-family: sans-serif;
 }
 .button:hover {
 	background-color: #71c174;
