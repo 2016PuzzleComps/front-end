@@ -460,9 +460,10 @@ function moveVehicle(pos) {
 				}
 			} else {
 				// if it's being dragged to the right
-				var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size;
-				if(newX + selectedVehicle.size >= testX && board.occupied[testX][selectedVehicle.y]) {
-					newX = testX - selectedVehicle.size;
+				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX); testX++) {
+					if(board.occupied[testX][selectedVehicle.y]) {
+						newX = testX - selectedVehicle.size;
+					}
 				}
 			}
 			// move vehicle horizontally
