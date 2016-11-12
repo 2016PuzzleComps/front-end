@@ -92,6 +92,9 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
 
 # verify that a log file represents a valid solve
 def solve_log_is_valid(solve_id, log_file, status):
+    log_file = log_file.strip()
+    if log_file == '':
+        return False
     puzzle_file = get_puzzle_file_from_database(solve_id)
     board = Board(puzzle_file)
     vehicle_index = 0
@@ -99,8 +102,8 @@ def solve_log_is_valid(solve_id, log_file, status):
     prev_timestamp = 0
     try:
         for move in log_file.split('\n'):
-            if not move:
-                break
+            if move == '':
+                return False
             move = move.split(' ')
             timestamp = int(move[0])
             if not timestamp > prev_timestamp:
@@ -139,7 +142,7 @@ def get_puzzle_file():
 
 # receive new solve log file from client
 @app.route('/log-file', methods=['POST'])
-def put_log_file():
+def post_log_file():
     try:
         request = json.loads(flask.request.data.decode('utf-8'))
         solve_id = request['solve_id']
