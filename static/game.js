@@ -463,7 +463,7 @@ function moveVehicle(pos) {
 				// if it's being dragged to the right
 				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX) + selectedVehicle.size; testX++) {
 					if(board.occupied[testX][selectedVehicle.y]) {
-						newX = testX - selectedVehicle.size;
+						newX = testX - selectedVehicle.size - 1;
 						break;
 					}
 				}
