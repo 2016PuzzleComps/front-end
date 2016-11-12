@@ -456,13 +456,15 @@ function moveVehicle(pos) {
 				for(var testX = Math.floor(selectedVehicle.x) - 1; testX >= Math.floor(newX); testX--) {
 					if(board.occupied[testX][selectedVehicle.y]) {
 						newX = testX + 1;
+						break;
 					}
 				}
 			} else {
 				// if it's being dragged to the right
-				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX); testX++) {
+				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX) + selectedVehicle.size; testX++) {
 					if(board.occupied[testX][selectedVehicle.y]) {
 						newX = testX - selectedVehicle.size;
+						break;
 					}
 				}
 			}
