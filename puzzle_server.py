@@ -5,6 +5,7 @@ import json
 import config1 as config
 import hashlib
 import time
+import random
 from validation import *
 
 app = flask.Flask(__name__)
@@ -34,9 +35,10 @@ def compute_solve_id(puzzle_id):
 
 # get ID of a puzzle with fewest or tied for fewest logs in DB
 def get_next_puzzle_id():
-    query = ('SELECT puzzle_id FROM puzzles_by_id WHERE num_solves IN (SELECT min(num_solves) FROM puzzles_by_id )', ())
+    query = ('SELECT COUNT (*) FROM puzzles_by_id', ())
     rows = select_from_database(query)
-    puzzle_id = rows[0][0]
+    num_puzzles = rows[0][0]
+    puzzle_id = random.randint(0, num_puzzles)
     return puzzle_id
 
 # load puzzle file from db given its ID
