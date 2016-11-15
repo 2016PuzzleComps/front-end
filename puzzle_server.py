@@ -38,7 +38,7 @@ def get_next_puzzle_id():
     query = ('SELECT COUNT (*) FROM puzzles_by_id', ())
     rows = select_from_database(query)
     num_puzzles = rows[0][0]
-    puzzle_id = random.randint(0, num_puzzles)
+    puzzle_id = random.randint(0, num_puzzles-1)
     return puzzle_id
 
 # load puzzle file from db given its ID
