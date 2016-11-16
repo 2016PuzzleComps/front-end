@@ -1,3 +1,5 @@
+from collections import deque
+
 class Board:
     class Vehicle:
         def __init__(self, line):
@@ -34,15 +36,14 @@ class Board:
                 for j in range(v.size):
                     self.occupied.add((v.x, v.y + j))
     
-    def move_vehicle(self, vehicle_index, vector):
-        v = self.vehicles[vehicle_index]
+    def move_vehicle(self, move):
+        v = self.vehicles[move.vehicle_index]
         if v.is_horiz:
             h = 'T'
         else:
             h = 'F'
-        print("(%d, %d, %s, %d)" % (v.x, v.y, h, v.size))
-        for i in range(abs(vector)):
-            if not self.move_vehicle_by_one(vehicle_index, (vector > 0)):
+        for i in range(abs(move.vector)):
+            if not self.move_vehicle_by_one(move.vehicle_index, (move.vector > 0)):
                 return False
         return True
 
@@ -94,12 +95,52 @@ class Board:
     def is_solved(self):
         return self.vip.x + self.vip.size >= self.width
 
+class Move:
+    def __init__(self, vehicle_index, vector):
+        self.vehicle_index = vehicle_index
+        self.vector = vector
+    def inverse(self):
+        return Move(self.vehicle_index, -1 * self.vector)
+
+# verify that a log file represents a valid solve
+def solve_log_is_valid(puzzle_file, log_file, status):
+    board = Board(puzzle_file)
+    moves_stack = deque()
+    vector = 0
+    prev_timestamp = 0
+    for move_str in log_file.split('\n'):
+        if move_str == '':
+            return False
+        move_str_split = move_str.split(' ')
+        timestamp = int(move_str_split[0])
+        if not timestamp > prev_timestamp:
+            print("here")
+            return False
+        prev_timestamp = timestamp
+        if len(move_str_split) == 2:
+            if move_str_split[1] == 'R':
+                board = Board(puzzle_file)
+                moves_stack.clear()
+            elif move_str_split[1] == 'U':
+                if len(moves_stack) == 0:
+                    return False
+                board.move_vehicle(moves_stack[-1].inverse())
+                moves_stack.pop()
+            else:
+                return False
+        elif len(move_str_split) == 3:
+            move = Move(int(move_str_split[1]), int(move_str_split[2]))
+            if not board.move_vehicle(move):
+                return False
+            moves_stack.append(move)
+        else:
+            return False
+    if status == 1:
+        return board.is_solved()
+    else:
+        return True
+
 if __name__ == '__main__':
-    board = Board(open('puzzle.txt').read())
-    for move in open('log.txt'):
-        if not move:
-            break
-        _, vehicle_index, vector = map(int, move.split(" "))
-        if not board.move_vehicle(vehicle_index, vector):
-            print("False")
-    print(board.is_solved())
+    puzzle_file = open('puzzle.txt').read().strip()
+    log_file = open('log.txt').read().strip()
+    print(validate(puzzle_file, log_file, 1))
