@@ -21,8 +21,7 @@ def get_tutorial():
 # compute the MTurk Token for a solve
 def compute_mturk_token(solve_id):
     m = hashlib.md5()
-    #food = solve_id + str(time.time())
-    food = solve_id
+    food = solve_id + str(time.time())
     m.update(food.encode('utf-8'))
     return m.hexdigest()
 
