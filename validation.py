@@ -110,11 +110,13 @@ def solve_log_is_valid(puzzle_file, log_file, status):
     prev_timestamp = 0
     for move_str in log_file.split('\n'):
         if move_str == '':
+            print("empty move notation")
             return False
         move_str_split = move_str.split(' ')
+        print(move_str)
         timestamp = int(move_str_split[0])
         if not timestamp > prev_timestamp:
-            print("here")
+            print("invalid timestamp")
             return False
         prev_timestamp = timestamp
         if len(move_str_split) == 2:
@@ -123,20 +125,27 @@ def solve_log_is_valid(puzzle_file, log_file, status):
                 moves_stack.clear()
             elif move_str_split[1] == 'U':
                 if len(moves_stack) == 0:
+                    print("undo with no prev moves")
                     return False
                 board.move_vehicle(moves_stack[-1].inverse())
                 moves_stack.pop()
             else:
+                print("invalid move notation")
                 return False
         elif len(move_str_split) == 3:
             move = Move(int(move_str_split[1]), int(move_str_split[2]))
             if not board.move_vehicle(move):
+                print("invalid move")
                 return False
             moves_stack.append(move)
         else:
+            print("invalid move notation")
             return False
     if status == 1:
-        return board.is_solved()
+        result = board.is_solved()
+        if not result:
+            print("board not solved at end")
+        return result
     else:
         return True
 
