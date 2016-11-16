@@ -143,4 +143,4 @@ def solve_log_is_valid(puzzle_file, log_file, status):
 if __name__ == '__main__':
     puzzle_file = open('puzzle.txt').read().strip()
     log_file = open('log.txt').read().strip()
-    print(validate(puzzle_file, log_file, 1))
+    print(solve_log_is_valid(puzzle_file, log_file, 1))
