@@ -155,7 +155,7 @@ def post_log_file():
             # see if the log is valid in light of whether or not they purport to have solved it
             log_file = request['log_file']
             puzzle_id, mturk_token = solve_info
-            puzzle_file = get_puzzle_file_from_database(solve_id)
+            puzzle_file = get_puzzle_file_from_database(puzzle_id)
             if solve_log_is_valid(puzzle_file, log_file, status):
                 if status == 1:
                     response = {'success': True, 'mturk_token': mturk_token}
