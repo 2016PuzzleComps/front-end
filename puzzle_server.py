@@ -148,14 +148,9 @@ def insert_into_database(query):
     cursor.execute(query[0], query[1])
     connection.commit()
 
-if __name__ == '__main__':
-    try:
-        connection = psycopg2.connect(user=config.username, password=config.password)
-        cursor = connection.cursor()
-    except Exception as e:
-        print(e)
-        exit(1)
-    host = sys.argv[1]
-    port = int(sys.argv[2])
-    app.run(host=host, port=port)
-    connection.close()
+try:
+    connection = psycopg2.connect(user=config.username, password=config.password)
+    cursor = connection.cursor()
+except Exception as e:
+    print(e)
+    exit(1)
