@@ -18,6 +18,7 @@ var currentMoveNum = 0;
 var gameOver = false;
 var buttonAdded = false;
 var fiveMinutes = false;
+var pause = false;
 var numMoves = 0;
 var totalMoves;
 
@@ -96,19 +97,22 @@ function parseLogFile(text) {
 		if (items.length != 3) {
 			break;
 		}
+		var time = parseInt(items[0]);
         var currentVehicle = board.vehicles[parseInt(items[1])];
         var dist = parseInt(items[2]);
         if (currentVehicle.horiz) {
-            moveListLog.push(new Move(currentVehicle,currentVehicle.x, currentVehicle.x + dist));
-            currentVehicle.x = currentVehicle.x + dist;
-        } else {
-            moveListLog.push(new Move(currentVehicle, currentVehicle.y, currentVehicle.y + dist));
-            currentVehicle.y = currentVehicle.y + dist;
+            moveListLog.push(new LogMove(currentVehicle,currentVehicle.x, currentVehicle.x + dist, time));
+			currentVehicle.x = currentVehicle.x + dist;
+		} else {
+            moveListLog.push(new LogMove(currentVehicle, currentVehicle.y, currentVehicle.y + dist, time));
+			currentVehicle.y = currentVehicle.y + dist;
         }
-		currentMoveNum += 1;
 		totalMoves += 1;
 	}
-	drawFrame();
+	for (var j=totalMoves-1; j>=0; j--) {
+		undoLogMove(moveListLog[j]);
+	}
+	playMoves();
 }
 
 // submit solve log to server
@@ -245,6 +249,13 @@ function Move(vehicle, ipos, fpos) {
 	this.fpos = fpos;
 }
 
+function LogMove(vehicle, ipos, fpos, time) {
+	this.vehicle = vehicle;
+	this.ipos = ipos;
+	this.fpos = fpos;
+	this.time = time;
+}
+
 /* CANVAS STUFF */
 
 var canvas = document.getElementById("gameCanvas");
@@ -312,14 +323,29 @@ function moveBack() {
 		var move = moveListLog[currentMoveNum - 1];
 		undoLogMove(move);
 		currentMoveNum -= 1;
+		drawFrame();
 	}
 }
 
-function moveFoward() {
+function moveForward() {
 	if (currentMoveNum < totalMoves) {
 		var move = moveListLog[currentMoveNum];
 		doLogMove(move);
 		currentMoveNum += 1;
+		drawFrame();
+	}
+}
+
+function playMoves() {
+	if (currentMoveNum != 0) {
+		return;
+	}
+	var start = moveListLog[0].time-100;
+	for (var i=0; i<totalMoves; i++) {
+		var move = moveListLog[i];
+		setTimeout(function() {
+			moveForward();
+		}, move.time-start);
 	}
 }
 
@@ -624,7 +650,7 @@ var back = createReplayButton("backButton", "<");
 var forward = createReplayButton("forwardButton", ">");
 
 back.onclick = moveBack;
-forward.onclick = moveFoward;
+forward.onclick = moveForward;
 
 buttonDiv = document.getElementById("buttonsDiv");
 buttonDiv.insertBefore(back, buttonDiv.firstChild);
