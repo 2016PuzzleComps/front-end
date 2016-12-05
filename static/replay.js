@@ -13,11 +13,13 @@ var log = "";
 var moveList = [];
 var moveListLog = [];
 var currentMove;
+var currentMoveNum = 0;
 
 var gameOver = false;
 var buttonAdded = false;
 var fiveMinutes = false;
 var numMoves = 0;
+var totalMoves;
 
 var solveID;
 
@@ -88,6 +90,7 @@ function handleLogUpload(evt) {
 
 function parseLogFile(text) {
 	var lines = text.split("\n");
+	totalMoves = 0;
 	for (var i=0; i<lines.length; i++) {
 		var items = lines[i].split(" ");
 		if (items.length != 3) {
@@ -102,6 +105,8 @@ function parseLogFile(text) {
             moveListLog.push(new Move(currentVehicle, currentVehicle.y, currentVehicle.y + dist));
             currentVehicle.y = currentVehicle.y + dist;
         }
+		currentMoveNum += 1;
+		totalMoves += 1;
 	}
 	drawFrame();
 }
@@ -141,6 +146,31 @@ function undoMove() {
 		moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
 		logMove("U");
 	}
+}
+
+// undo a particular move
+function undoLogMove(lastMove) {
+	var currentPos;
+	// remove the vehicle from the prototype
+	board.placeVehicle(lastMove.vehicle, false);
+	if (lastMove.vehicle.horiz) {
+		currentPos = lastMove.vehicle.x;
+	} else {
+		currentPos = lastMove.vehicle.y;
+	}
+	moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
+}
+
+function doLogMove(nextMove) {
+	var currentPos;
+	// remove the vehicle from the prototype
+	board.placeVehicle(nextMove.vehicle, false);
+	if (nextMove.vehicle.horiz) {
+		currentPos = nextMove.vehicle.x;
+	} else {
+		currentPos = nextMove.vehicle.y;
+	}
+	moveVehicleTo(nextMove.vehicle, currentPos + (nextMove.fpos - nextMove.ipos));
 }
 
 // give up and submit partial log to server
@@ -278,11 +308,19 @@ function drawFrame() {
 }
 
 function moveBack() {
-	console.log("moving backward");
+	if (currentMoveNum > 0 && currentMoveNum <= totalMoves) {
+		var move = moveListLog[currentMoveNum - 1];
+		undoLogMove(move);
+		currentMoveNum -= 1;
+	}
 }
 
 function moveFoward() {
-	console.log("moving foward");
+	if (currentMoveNum < totalMoves) {
+		var move = moveListLog[currentMoveNum];
+		doLogMove(move);
+		currentMoveNum += 1;
+	}
 }
 
 /* I DON'T THINK THERE'S A CATEGORY FOR THIS */
