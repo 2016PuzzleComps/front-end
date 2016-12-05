@@ -98,7 +98,6 @@ function parseLogFile(text) {
         if (currentVehicle.horiz) {
             moveListLog.push(new Move(currentVehicle,currentVehicle.x, currentVehicle.x + dist));
             currentVehicle.x = currentVehicle.x + dist;
-            console.log(currentVehicle.x);
         } else {
             moveListLog.push(new Move(currentVehicle, currentVehicle.y, currentVehicle.y + dist));
             currentVehicle.y = currentVehicle.y + dist;
@@ -276,6 +275,14 @@ function drawFrame() {
 	for(i in board.vehicles) {
 		drawVehicle(board.vehicles[i]);
 	}
+}
+
+function moveBack() {
+	console.log("moving backward");
+}
+
+function moveFoward() {
+	console.log("moving foward");
 }
 
 /* I DON'T THINK THERE'S A CATEGORY FOR THIS */
@@ -564,7 +571,28 @@ document.body.addEventListener("touchmove", function (e) {
 	}
 }, false);
 
-// DO THE STUFF
+// Add 'forward' and 'backward' buttons to the buttonsDiv
+
+function createReplayButton(id, text) {
+	var button = document.createElement(id);
+	var text = document.createTextNode(text);
+	button.appendChild(text);
+	button.className = "button";
+	button.classList.add("replayButton");
+	return button;
+}
+
+var back = createReplayButton("backButton", "<");
+var forward = createReplayButton("forwardButton", ">");
+
+back.onclick = moveBack;
+forward.onclick = moveFoward;
+
+buttonDiv = document.getElementById("buttonsDiv");
+buttonDiv.insertBefore(back, buttonDiv.firstChild);
+buttonDiv.appendChild(forward);
+
+// Set the button actions
 
 document.getElementById('puzzle_file').addEventListener('change', handlePuzzleUpload, false);
 document.getElementById('log_file').addEventListener('change', handleLogUpload, false);
