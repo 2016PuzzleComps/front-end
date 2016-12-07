@@ -14,6 +14,7 @@ var moveList = [];
 var moveListLog = [];
 var currentMove;
 var currentMoveNum = 0;
+var resetBoards = [];
 
 var gameOver = false;
 var buttonAdded = false;
@@ -94,19 +95,38 @@ function parseLogFile(text) {
 	totalMoves = 0;
 	for (var i=0; i<lines.length; i++) {
 		var items = lines[i].split(" ");
-		if (items.length != 3) {
-			break;
-		}
+		// If there is an error, display a message
+		if (items.length < 2 || items.length > 3) {
+			alert("Error in log file");
+			return;
+		} 
 		var time = parseInt(items[0]);
-        var currentVehicle = board.vehicles[parseInt(items[1])];
-        var dist = parseInt(items[2]);
-        if (currentVehicle.horiz) {
-            moveListLog.push(new LogMove(currentVehicle,currentVehicle.x, currentVehicle.x + dist, time));
-			currentVehicle.x = currentVehicle.x + dist;
+		// Handle undo and reset separately 
+		if (items.length == 2) {
+			var type = items[1].trim();
+			if (type === 'U' && totalMoves > 0) {
+				// Store the undo move as a regular move, only backwards
+				var lastMove = moveListLog[totalMoves-1];
+				moveListLog.push(new LogMove(lastMove.vehicle, lastMove.fpos, lastMove.ipos, time, type));
+			} else if (type === 'R' && totalMoves > 0) {
+				moveListLog.push(new LogMove(null, null, null, time, type));
+			} else {
+				alert("Error in log file");
+				return;
+			}
+		} else if (items.length == 3) {
+			var currentVehicle = board.vehicles[parseInt(items[1])];
+			var dist = parseInt(items[2]);
+			if (currentVehicle.horiz) {
+				moveListLog.push(new LogMove(currentVehicle,currentVehicle.x, currentVehicle.x + dist, time, 'N'));
+			} else {
+				moveListLog.push(new LogMove(currentVehicle, currentVehicle.y, currentVehicle.y + dist, time, 'N'));
+			}
 		} else {
-            moveListLog.push(new LogMove(currentVehicle, currentVehicle.y, currentVehicle.y + dist, time));
-			currentVehicle.y = currentVehicle.y + dist;
-        }
+			alert("Error in log file");
+			return;
+		}
+		doLogMove(moveListLog[totalMoves]);
 		totalMoves += 1;
 	}
 	for (var j=totalMoves-1; j>=0; j--) {
@@ -155,6 +175,11 @@ function undoMove() {
 // undo a particular move
 function undoLogMove(lastMove) {
 	var currentPos;
+	
+	if (lastMove.type === 'R') {
+		undoLogReset();
+		return;
+	}
 	// remove the vehicle from the prototype
 	board.placeVehicle(lastMove.vehicle, false);
 	if (lastMove.vehicle.horiz) {
@@ -167,6 +192,11 @@ function undoLogMove(lastMove) {
 
 function doLogMove(nextMove) {
 	var currentPos;
+
+	if (nextMove.type === 'R') {
+		doLogReset();
+		return;
+	}
 	// remove the vehicle from the prototype
 	board.placeVehicle(nextMove.vehicle, false);
 	if (nextMove.vehicle.horiz) {
@@ -175,6 +205,15 @@ function doLogMove(nextMove) {
 		currentPos = nextMove.vehicle.y;
 	}
 	moveVehicleTo(nextMove.vehicle, currentPos + (nextMove.fpos - nextMove.ipos));
+}
+
+function undoLogReset() {
+	board = resetBoards.pop();
+}
+
+function doLogReset() {
+	resetBoards.push(board);
+	resetBoardToText(initialBoard);
 }
 
 // give up and submit partial log to server
@@ -249,11 +288,13 @@ function Move(vehicle, ipos, fpos) {
 	this.fpos = fpos;
 }
 
-function LogMove(vehicle, ipos, fpos, time) {
+function LogMove(vehicle, ipos, fpos, time, type) {
 	this.vehicle = vehicle;
 	this.ipos = ipos;
 	this.fpos = fpos;
 	this.time = time;
+	// Type is normal, undo, or reset: 'N', 'U', 'R'
+	this.type = type;
 }
 
 /* CANVAS STUFF */
@@ -369,6 +410,21 @@ function loadBoardFromText(text) {
 		if (isFirst) {
 			isFirst = false;
 		}
+	}
+	drawFrame();
+}
+
+// Resets a board to the board described in a block of text
+function resetBoardToText(text) {
+	var lines = text.split("\n");
+	var dimen = lines[0].split(" ");
+	for (var i=1; i<lines.length; i++) {
+		var items = lines[i].split(" ");
+		if (items.length != 4) {
+			break;
+		}
+		board.vehicles[i-1].y = parseInt(items[0]);
+		board.vehicles[i-1].x = parseInt(items[1]);
 	}
 	drawFrame();
 }
