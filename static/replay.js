@@ -207,12 +207,15 @@ function doLogMove(nextMove) {
 	moveVehicleTo(nextMove.vehicle, currentPos + (nextMove.fpos - nextMove.ipos));
 }
 
+// Undoes a reset that was in the log
 function undoLogReset() {
-	board = resetBoards.pop();
+	resetBoardToText(resetBoards.pop());
 }
 
+// Does a basic reset, but saves the positions of the cars
 function doLogReset() {
-	resetBoards.push(board);
+	var text = saveBoardToText();
+	resetBoards.push(text);
 	resetBoardToText(initialBoard);
 }
 
@@ -417,16 +420,32 @@ function loadBoardFromText(text) {
 // Resets a board to the board described in a block of text
 function resetBoardToText(text) {
 	var lines = text.split("\n");
-	var dimen = lines[0].split(" ");
 	for (var i=1; i<lines.length; i++) {
+		var curVehicle = board.vehicles[i-1];
 		var items = lines[i].split(" ");
 		if (items.length != 4) {
 			break;
 		}
-		board.vehicles[i-1].y = parseInt(items[0]);
-		board.vehicles[i-1].x = parseInt(items[1]);
+
+		board.placeVehicle(curVehicle, false);
+
+		curVehicle.x = parseInt(items[0]);
+		curVehicle.y = parseInt(items[1]);
+
+		board.placeVehicle(curVehicle, true);
 	}
 	drawFrame();
+}
+
+function saveBoardToText() {
+	var text=board.width + " " + board.height + " " + "\n";
+	for (var i in board.vehicles) {
+		var curVehicle = board.vehicles[i];
+		var isHoriz = "T";
+		if (!curVehicle.horiz) { isHoriz = "F"; }
+		text += curVehicle.x + " " + curVehicle.y + " " + curVehicle.size + " " + isHoriz + "\n";
+	}
+	return text;
 }
 
 
