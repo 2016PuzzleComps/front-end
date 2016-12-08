@@ -12,9 +12,12 @@ var initialBoard = "";
 var moveListLog = [];
 var currentMoveNum = 0;
 var resetBoards = [];
+var currentTimeout;
 
 var pause = false;
 var totalMoves;
+
+var playpausetext;
 
 /*
 var buttonAdded = false;
@@ -120,6 +123,18 @@ function parseLogFile(text) {
 
 /* MOVEMENT FUNCTIONS */
 
+function handleBack() {
+	if (!pause) {
+		togglePlay();
+	} moveBack();
+}
+
+function handleForward() {
+	if (!pause) {
+		togglePlay();
+	} moveForward();
+}
+
 // Moves back one move in the log
 function moveBack() {
 	if (currentMoveNum > 0 && currentMoveNum <= totalMoves) {
@@ -137,6 +152,8 @@ function moveForward() {
 		doLogMove(move);
 		currentMoveNum += 1;
 		drawFrame();
+	} else {
+		pause = true;
 	}
 }
 
@@ -337,23 +354,40 @@ function drawFrame() {
 	}
 }
 
+function togglePlay() {
+	if (pause) {
+		pause = false;
+		playNextMove();
+		playpausetext.nodeValue = "\u23F8";
+	} else {
+		pause = true;
+		clearTimeout(currentTimeout);
+		playpausetext.nodeValue = "\u25B6";
+	}
+}
+
 // Starts playing the moves as they occurred in the log file
 function playMoves() {
 	if (currentMoveNum != 0) {
 		return;
 	}
-	var start = moveListLog[0].time-100;
-	for (var i=0; i<totalMoves; i++) {
-		var move = moveListLog[i];
-		setTimeout(function() {
-			moveForward();
-		}, move.time-start);
-	}
+	playNextMove();
 }
 
 // Plays the next move
 function playNextMove() {
+	// If we're at the end, stop scheduling more moves
+	if (currentMoveNum >= totalMoves) { return; }
 
+	// Get the starting time for the timeout
+	var start = moveListLog[0].time - 250;
+	if (currentMoveNum > 0) {
+		start = moveListLog[currentMoveNum-1].time;
+	}
+	currentTimeout = setTimeout(function() {
+		moveForward();
+		playNextMove();
+	}, moveListLog[currentMoveNum].time-start);
 }
 
 /* BOARD <-> TEXT FUNCTIONS */
@@ -422,15 +456,26 @@ function createReplayButton(id, text) {
 	return button;
 }
 
+function createPlayPauseButton() {
+	var button = document.createElement('playpause');
+	playpausetext = document.createTextNode('\u23F8');
+	button.appendChild(playpausetext);
+	button.className = "button";
+	button.onclick = togglePlay;
+	return button;
+}
+
 var back = createReplayButton("backButton", "<");
 var forward = createReplayButton("forwardButton", ">");
+var playpause = createPlayPauseButton();
 
-back.onclick = moveBack;
-forward.onclick = moveForward;
+back.onclick = handleBack;
+forward.onclick = handleForward;
 
 buttonDiv = document.getElementById("buttonsDiv");
 buttonDiv.insertBefore(back, buttonDiv.firstChild);
 buttonDiv.appendChild(forward);
+buttonDiv.appendChild(playpause);
 
 // Set the button actions
 
