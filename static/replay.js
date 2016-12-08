@@ -9,35 +9,15 @@ var boardColor = '#e8d39b';
 
 var board;
 var initialBoard = "";
-var log = "";
-var moveList = [];
 var moveListLog = [];
-var currentMove;
 var currentMoveNum = 0;
 var resetBoards = [];
 
-var gameOver = false;
-var buttonAdded = false;
-var fiveMinutes = false;
 var pause = false;
-var numMoves = 0;
 var totalMoves;
 
-var solveID;
-
-// open the win tab
-function openFinish(title, body) {
-	document.getElementById("title").innerHTML = title;
-	document.getElementById("body").innerHTML = body;
-	document.getElementById("finish").style.height = "100%";
-}
-
-function waitToQuit() {
-	setTimeout(function() { 
-		fiveMinutes = true; 
-	}, 300000);
-}
-
+/*
+var buttonAdded = false;
 function insertQuitButton() {
 	var giveUpButton = document.createElement("giveUpButton");
 	var text = document.createTextNode("Give Up");
@@ -48,9 +28,9 @@ function insertQuitButton() {
 	buttonDiv.appendChild(giveUpButton);
 	giveUpButton.onclick = giveUp;
 	buttonAdded = true;
-}
+}*/
 
-/* SERVER STUFF */
+/* Puzzle and log file uploading */
 
 // receive puzzle from server
 function handlePuzzleUpload(evt) {
@@ -89,6 +69,9 @@ function handleLogUpload(evt) {
 	};
 	reader.readAsText(file);
 }
+
+
+/* FILE PARSERS */
 
 function parseLogFile(text) {
 	var lines = text.split("\n");
@@ -135,44 +118,29 @@ function parseLogFile(text) {
 	playMoves();
 }
 
-// submit solve log to server
-function submitLog(completed) {
-	//Do nothing or open finish?
-}
+/* MOVEMENT FUNCTIONS */
 
-/* BUTTON STUFF */
-
-document.getElementById('resetButton').onclick = resetBoard;
-document.getElementById('undoButton').onclick = undoMove;
-
-// Resets the board to the initial state (if there is one)
-function resetBoard() {
-	if(!gameOver && initialBoard != "") {
-		loadBoardFromText(initialBoard);
-		// clear most recent moves and log the board reset
-		moveList = [];
-		logMove("R");
+// Moves back one move in the log
+function moveBack() {
+	if (currentMoveNum > 0 && currentMoveNum <= totalMoves) {
+		var move = moveListLog[currentMoveNum - 1];
+		undoLogMove(move);
+		currentMoveNum -= 1;
+		drawFrame();
 	}
 }
 
-// undo the last move
-function undoMove() {
-	if(!gameOver && moveList.length > 0) {
-		var lastMove = moveList.pop();
-		var currentPos;
-		// remove the vehicle from the prototype
-		board.placeVehicle(lastMove.vehicle, false);
-		if (lastMove.vehicle.horiz) {
-			currentPos = lastMove.vehicle.x;
-		} else {
-			currentPos = lastMove.vehicle.y;
-		}
-		moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
-		logMove("U");
+// Moves forward one move in the log
+function moveForward() {
+	if (currentMoveNum < totalMoves) {
+		var move = moveListLog[currentMoveNum];
+		doLogMove(move);
+		currentMoveNum += 1;
+		drawFrame();
 	}
 }
 
-// undo a particular move
+// Undoes a particular move
 function undoLogMove(lastMove) {
 	var currentPos;
 	
@@ -190,6 +158,7 @@ function undoLogMove(lastMove) {
 	moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
 }
 
+// Does a particular move
 function doLogMove(nextMove) {
 	var currentPos;
 
@@ -219,10 +188,16 @@ function doLogReset() {
 	resetBoardToText(initialBoard);
 }
 
-// give up and submit partial log to server
-function giveUp() {
-	gameOver = true;
-	submitLog(false);
+// moves a vehicle to the given position
+function moveVehicleTo(vehicle, pos) {
+	if (vehicle.horiz) {
+		vehicle.x = pos;
+	} else {
+		vehicle.y = pos;
+	}
+	// place the vehicle in the prototype
+	board.placeVehicle(vehicle, true);
+	drawFrame();
 }
 
 /* CLASS DEFINITION STUFF */
@@ -362,24 +337,7 @@ function drawFrame() {
 	}
 }
 
-function moveBack() {
-	if (currentMoveNum > 0 && currentMoveNum <= totalMoves) {
-		var move = moveListLog[currentMoveNum - 1];
-		undoLogMove(move);
-		currentMoveNum -= 1;
-		drawFrame();
-	}
-}
-
-function moveForward() {
-	if (currentMoveNum < totalMoves) {
-		var move = moveListLog[currentMoveNum];
-		doLogMove(move);
-		currentMoveNum += 1;
-		drawFrame();
-	}
-}
-
+// Starts playing the moves as they occurred in the log file
 function playMoves() {
 	if (currentMoveNum != 0) {
 		return;
@@ -393,7 +351,12 @@ function playMoves() {
 	}
 }
 
-/* I DON'T THINK THERE'S A CATEGORY FOR THIS */
+// Plays the next move
+function playNextMove() {
+
+}
+
+/* BOARD <-> TEXT FUNCTIONS */
 
 // Loads a board from a given block of text
 function loadBoardFromText(text) {
@@ -448,268 +411,6 @@ function saveBoardToText() {
 	return text;
 }
 
-
-/* LOGGING STUFF */
-
-// saves a move to the movelist and log
-function saveMove(selectedVehicleIndex, move) {
-	var selectedVehicle = board.vehicles[selectedVehicleIndex];
-	// save to the currentMove
-	if(selectedVehicle.horiz) {
-		currentMove.fpos = selectedVehicle.x;
-	} else {
-		currentMove.fpos = selectedVehicle.y;
-	}
-	if (currentMove.ipos != currentMove.fpos) {
-		moveList.push(currentMove);
-	}
-	// if there was a move, record it in the recent moves
-	// and in the log
-	var logLine = selectedVehicleIndex + " ";
-	if (currentMove.ipos != currentMove.fpos) {
-		logLine += currentMove.fpos - currentMove.ipos;
-	} else {
-		return;
-	}
-	logMove(logLine);
-}
-
-// saves a move to the log with a timestamp
-function logMove(moveString) {
-	log += Date.now() + " " + moveString + "\n";
-	numMoves++;
-    if (!buttonAdded && numMoves > 50 && fiveMinutes) {
-		insertQuitButton();
-	}
-}
-
-/* MOUSE/TOUCH EVENT STUFF */
-
-var fingerDown = false; // whether a finger is touching the screen or not
-var selectedVehicleIndex = null; // index of vehicle in board.vehicles that is selected by mouse
-var mouseOffset = 0; // offset from origin of selected vehicle
-
-// get position of mouse at a mouse event
-function getMousePos(evt) {
-	var rect = canvas.getBoundingClientRect();
-	return {
-		x: evt.clientX - rect.left - borderWidth,
-		y: evt.clientY - rect.top - borderWidth
-	};
-}
-
-// get position of finger at a touch event
-function getTouchPos(evt) {
-	var rect = canvas.getBoundingClientRect();
-	return {
-		x: evt.touches[0].clientX - rect.left - borderWidth,
-		y: evt.touches[0].clientY - rect.top - borderWidth
-	};
-}
-
-// select vehicle
-canvas.addEventListener('mousedown', function(evt) {
-	selectVehicle(getMousePos(evt));
-});
-canvas.addEventListener('touchstart', function(evt) {
-	if(evt.changedTouches[0].identifier == 0) {
-		selectVehicle(getTouchPos(evt));
-	}
-	fingerDown = true;
-});
-
-// deselect vehicle
-canvas.addEventListener('mouseup', deselectVehicle);
-canvas.addEventListener('mouseleave', deselectVehicle);
-canvas.addEventListener('touchleave', deselectVehicle);
-canvas.addEventListener('touchend', function(evt) {
-	if(evt.changedTouches[0].identifier == 0) {
-		deselectVehicle();
-		fingerDown = false;
-	}
-});
-
-// move vehicle
-canvas.addEventListener('mousemove', function(evt) {
-	if(!fingerDown) {
-		moveVehicle(getMousePos(evt));
-	}
-});
-canvas.addEventListener('touchmove', function(evt) {
-	if(evt.changedTouches[0].identifier == 0) {
-		moveVehicle(getTouchPos(evt));
-	}
-});
-
-// moves a vehicle to the given position
-function moveVehicleTo(vehicle, pos) {
-	if (vehicle.horiz) {
-		vehicle.x = pos;
-	} else {
-		vehicle.y = pos;
-	}
-	// place the vehicle in the prototype
-	board.placeVehicle(vehicle, true);
-	drawFrame();
-}
-
-// start moving a vehicle
-function selectVehicle(pos) {
-	// if puzzle is loaded
-	if(gameOver || !board || selectedVehicleIndex != null) {
-		return;
-	}
-	// find if pos is over a vehicle on the board
-	for(i in board.vehicles) {
-		var v = board.vehicles[i];
-		if(v.horiz) {
-			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + v.size) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + 1) * squareSize)) {
-				selectedVehicleIndex = i;
-				mouseOffset = pos.x - (v.x * squareSize);
-				break;
-			}
-		} else {
-			if((v.x * squareSize <= pos.x) && (pos.x <= (v.x + 1) * squareSize) && (v.y * squareSize <= pos.y) && (pos.y <= (v.y + v.size) * squareSize)) {
-				selectedVehicleIndex = i;
-				mouseOffset = pos.y - (v.y * squareSize);
-				break;
-			}
-		}
-	}
-	if(selectedVehicleIndex != null) {
-		var selectedVehicle = board.vehicles[selectedVehicleIndex];
-		var pos;
-		if (selectedVehicle.horiz) {
-			pos = selectedVehicle.x;
-		} else {
-			pos = selectedVehicle.y;
-		}
-		currentMove = new Move(selectedVehicle, pos, pos);
-		board.placeVehicle(selectedVehicle, false);
-	}
-}
-
-// drag a vehicle
-function moveVehicle(pos) {
-	if(selectedVehicleIndex != null) {
-		var selectedVehicle = board.vehicles[selectedVehicleIndex];
-		if(selectedVehicle.horiz) {
-			var newX = (pos.x - mouseOffset) / squareSize;
-			if(newX < selectedVehicle.x) {
-				// if it's being dragged to the left
-				for(var testX = Math.floor(selectedVehicle.x) - 1; testX >= Math.floor(newX); testX--) {
-					if(board.occupied[testX][selectedVehicle.y]) {
-						newX = testX + 1;
-						break;
-					}
-				}
-                if (board.occupied[Math.floor(newX)][selectedVehicle.y]) {
-                    console.log("hes cheating left");
-                    return;
-                }
-                selectedVehicle.x = newX;
-                drawFrame();
-			} else {
-				// if it's being dragged to the right
-				for(var testX = Math.ceil(selectedVehicle.x) + selectedVehicle.size; testX <= Math.ceil(newX) + selectedVehicle.size - 1; testX++) {
-					if(board.occupied[testX][selectedVehicle.y]) {
-						newX = testX - selectedVehicle.size;
-						break;
-					}
-				}
-                if (board.occupied[Math.floor(newX)][selectedVehicle.y]) {
-                    console.log("hes cheating right");
-                    return;
-                }
-                selectedVehicle.x = newX;
-                drawFrame();
-			}
-			// move vehicle horizontally
-			selectedVehicle.x = newX;
-		} else {
-			var newY = (pos.y - mouseOffset) / squareSize;
-			// check other vehicles
-			if(newY < selectedVehicle.y) {
-				// if it's being dragged up
-				for(var testY = Math.floor(selectedVehicle.y) - 1; testY >= Math.floor(newY); testY--) {
-					if(board.occupied[selectedVehicle.x][testY]) {
-						newY = testY + 1;
-						break;
-					}
-				}
-                if(board.occupied[selectedVehicle.x][Math.floor(newY)]) {
-                    console.log("hes cheating up");
-                    return;
-                }
-                selectedVehicle.y = newY;
-                drawFrame();
-			} else {
-				// if it's being dragged down
-				for(var testY = Math.ceil(selectedVehicle.y) + selectedVehicle.size; testY <= Math.ceil(newY) + selectedVehicle.size - 1; testY++) {
-					if(board.occupied[selectedVehicle.x][testY]) {
-						newY = testY - selectedVehicle.size;
-						break;
-					}
-				}
-                if(board.occupied[selectedVehicle.x][Math.floor(newY)]) {
-                    console.log("hes cheating down");
-                    return;
-                }
-                selectedVehicle.y = newY;
-                drawFrame();
-			}
-			// move vehicle vertically
-			selectedVehicle.y = newY;
-		}
-		drawFrame();
-	}
-}
-
-// stop moving a vehicle
-function deselectVehicle(evt) {
-	if(selectedVehicleIndex) {
-		var selectedVehicle = board.vehicles[selectedVehicleIndex];
-		// snap selected vehicle to nearest spot
-		var pos;
-		if(selectedVehicle.horiz) {
-			pos = Math.round(selectedVehicle.x);
-		} else {
-			pos = Math.round(selectedVehicle.y);
-		}
-		moveVehicleTo(selectedVehicle, pos);
-		saveMove(selectedVehicleIndex, currentMove);
-		// draw frame, twice to avoid rendering bugs
-		drawFrame();
-		// check for victory and output code
-		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
-			openFinish();
-			selectedVehicle.x = board.width + 1;
-			drawFrame();
-			gameOver = true;
-			submitLog(true);
-		}
-		// deselect vehicle
-		selectedVehicleIndex = null;
-	}
-}
-
-// prevent touch scrolling
-document.body.addEventListener("touchstart", function (e) {
-	if (e.target == canvas) {
-		e.preventDefault();
-	}
-}, false);
-document.body.addEventListener("touchend", function (e) {
-	if (e.target == canvas) {
-		e.preventDefault();
-	}
-}, false);
-document.body.addEventListener("touchmove", function (e) {
-	if (e.target == canvas) {
-		e.preventDefault();
-	}
-}, false);
-
 // Add 'forward' and 'backward' buttons to the buttonsDiv
 
 function createReplayButton(id, text) {
@@ -735,5 +436,3 @@ buttonDiv.appendChild(forward);
 
 document.getElementById('puzzle_file').addEventListener('change', handlePuzzleUpload, false);
 document.getElementById('log_file').addEventListener('change', handleLogUpload, false);
-
-waitToQuit();
