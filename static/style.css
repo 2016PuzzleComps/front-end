@@ -7,7 +7,7 @@ body {
     border: none;
     background-color: #4caf50;
     color: white;
-    padding: 15px 32px;
+    padding: 7px 15px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -28,6 +28,16 @@ body {
 }
 .giveUpButton:active {
 	background-color: #931919;
+}
+
+.material-icons {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
 }
 
 #gameCanvas {

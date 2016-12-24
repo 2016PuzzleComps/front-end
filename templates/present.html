@@ -7,8 +7,16 @@
         <input type="file" id="puzzle_file">
         <input type="file" id="log_file" disabled="true">
         <div id="buttonsDiv">
-            <button type="button" id="resetButton" class="button">Reset</button>
-		    <button type="button" id="undoButton" class="button">Undo</button>
+			<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+			<button type="button" class="button">
+				<i class="material-icons" id="backButton">skip_previous</i>
+			</button>
+			<button type="button" class="button">
+				<i class="material-icons" id="playPause">pause</i>
+			</button>
+			<button type="button" class="button">
+				<i class="material-icons" id="forwardButton">skip_next</i>
+			</button>
         </div>
 		<p><canvas id="gameCanvas" width="662" height="800"> </canvas></p>
 

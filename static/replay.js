@@ -17,8 +17,6 @@ var currentTimeout;
 var pause = false;
 var totalMoves;
 
-var playpausetext;
-
 /*
 var buttonAdded = false;
 function insertQuitButton() {
@@ -358,11 +356,11 @@ function togglePlay() {
 	if (pause) {
 		pause = false;
 		playNextMove();
-		playpausetext.nodeValue = "\u23F8";
+		document.getElementById('playPause').innerHTML = 'pause';
 	} else {
 		pause = true;
 		clearTimeout(currentTimeout);
-		playpausetext.nodeValue = "\u25B6";
+		document.getElementById('playPause').innerHTML = 'play_arrow';
 	}
 }
 
@@ -445,39 +443,11 @@ function saveBoardToText() {
 	return text;
 }
 
-// Add 'forward' and 'backward' buttons to the buttonsDiv
-
-function createReplayButton(id, text) {
-	var button = document.createElement(id);
-	var text = document.createTextNode(text);
-	button.appendChild(text);
-	button.className = "button";
-	button.classList.add("replayButton");
-	return button;
-}
-
-function createPlayPauseButton() {
-	var button = document.createElement('playpause');
-	playpausetext = document.createTextNode('\u23F8');
-	button.appendChild(playpausetext);
-	button.className = "button";
-	button.onclick = togglePlay;
-	return button;
-}
-
-var back = createReplayButton("backButton", "<");
-var forward = createReplayButton("forwardButton", ">");
-var playpause = createPlayPauseButton();
-
-back.onclick = handleBack;
-forward.onclick = handleForward;
-
-buttonDiv = document.getElementById("buttonsDiv");
-buttonDiv.insertBefore(back, buttonDiv.firstChild);
-buttonDiv.appendChild(forward);
-buttonDiv.appendChild(playpause);
-
 // Set the button actions
+document.getElementById('backButton').onclick = handleBack;
+document.getElementById('forwardButton').onclick = handleForward;
+document.getElementById('playPause').onclick = togglePlay;
+
 
 document.getElementById('puzzle_file').addEventListener('change', handlePuzzleUpload, false);
 document.getElementById('log_file').addEventListener('change', handleLogUpload, false);
