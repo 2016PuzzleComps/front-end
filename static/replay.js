@@ -66,9 +66,44 @@ function handleLogUpload(evt) {
 	reader.onloadend = function(evt) {
 		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
 			parseLogFile(evt.target.result);
+			
+			validateLog(initialBoard, evt.target.result);
 		}
 	};
 	reader.readAsText(file);
+}
+
+/* SERVER STUFF */
+// submit solve log to server
+function submitLog(puzzle, log) {
+	var oReq = new XMLHttpRequest();
+	// on successful response
+	oReq.addEventListener('load', function() {
+		var title;
+		var body;
+		if(this.status == 200) {
+			var resp = JSON.parse(this.responseText);
+			if(! resp.success) {
+				// Not a valid solve log
+				alert("Not a valid solve log:\n", resp.message);
+				document.getElementById('log_file').disabled=false;
+			}
+		} else {
+			// if something went wrong on the server
+			alert("Something went wrong with the server");;
+			document.getElementById('log_file').disabled=false;
+		}
+	});
+	// on connection error
+	oReq.addEventListener('error', function() {
+		alert("Uh oh...", "The server seems to be down. Try again later?");
+	});
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/validate");
+	var msg = {
+		log_file: log,
+		puzzle_file: puzzle
+	};
+	oReq.send(JSON.stringify(msg));
 }
 
 

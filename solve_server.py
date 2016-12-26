@@ -11,8 +11,25 @@ app = flask.Flask(__name__)
 def get_index():
     return flask.render_template('present.html')
 
+# receive new solve log file from client
+@app.route('/validate', methods=['POST'])
+def post_log_file():
+    try:
+        request = json.loads(flask.request.data.decode('utf-8'))
+        puzzle_file = request['puzzle_file']
+        log_file = request['log_file']
+        # see if the log is a valid solution
+        if solve_log_is_valid(puzzle_file, log_file):
+            response = {'success': True}
+        else:
+            response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
+    except json.decoder.JSONDecodeError:
+        response = {'success': False, 'message': "Invalid JSON! What are you up to..."}
+    # send response
+    return json.dumps(response)
+
 # verify that a log file represents a valid solve
-def solve_log_is_valid(puzzle_file, log_file, status):
+def solve_log_is_valid(puzzle_file, log_file):
     log_file = log_file.strip()
     if log_file == '':
         return False
@@ -43,10 +60,11 @@ def solve_log_is_valid(puzzle_file, log_file, status):
                     return False
             else:
                 return False
-        if status == 1:
-            return board.is_solved()
-        else:
-            return True
+        #We want any board ending state to be valid, so we just check if
+        #each move is valid, not if they solved it
+        #return board.is_solved()
+        
+        return True
     except:
         return False
 
