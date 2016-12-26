@@ -392,16 +392,29 @@ function playNextMove() {
 
 // Loads a board from a given block of text
 function loadBoardFromText(text) {
-	initialBoard = text;
 	var lines = text.split("\n");
 	var dimen = lines[0].split(" ");
+	// Do some validation on the log file
+	if (lines.length < 2) {
+		alert("Incorrect puzzle file format, it is too short");
+		document.getElementById('log_file').disabled=false;
+		return;
+	} if (dimen.length != 2) {
+		alert("Incorrect puzzle file format on line 1");    
+		document.getElementById('log_file').disabled=false;
+		return;
+	}
+	initialBoard = text;
 	var exitOffset = parseInt(lines[1].split(" ")[1]);
 	board = new Board(parseInt(dimen[0]), parseInt(dimen[1]), exitOffset);
 	var isFirst = true;
 	for (var i=1; i<lines.length; i++) {
 		var items = lines[i].split(" ");
 		if (items.length != 4) {
-			break;
+			if (items.length < 2) { break; }
+			alert("Incorrect puzzle file format on line "+(i+1));
+			document.getElementById('log_file').disabled=false;
+			return;
 		}
 		var newVehicle = new Vehicle(isFirst, items[3].charAt(0)=="T", parseInt(items[2]), parseInt(items[0]), parseInt(items[1]));
 		board.addVehicle(newVehicle);
