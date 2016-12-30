@@ -174,7 +174,6 @@ function moveBack() {
 		var move = moveListLog[currentMoveNum - 1];
 		undoLogMove(move);
 		currentMoveNum -= 1;
-		drawFrame();
 	}
 }
 
@@ -184,7 +183,6 @@ function moveForward() {
 		var move = moveListLog[currentMoveNum];
 		doLogMove(move);
 		currentMoveNum += 1;
-		drawFrame();
 	} else {
 		pause = true;
 	}
@@ -206,6 +204,14 @@ function undoLogMove(lastMove) {
 		currentPos = lastMove.vehicle.y;
 	}
 	moveVehicleTo(lastMove.vehicle, currentPos + (lastMove.ipos - lastMove.fpos));
+	if (lastMove.type === 'U') {
+		// Color that car differently
+		if (lastMove.vehicle.isVip) {
+			drawVehicleStyle(lastMove.vehicle, '#d56161');
+		} else {
+			drawVehicleStyle(lastMove.vehicle, '#508acd');
+		}
+	}
 }
 
 // Does a particular move
@@ -228,10 +234,8 @@ function doLogMove(nextMove) {
 		// Color that car differently
 		if (nextMove.vehicle.isVip) {
 			drawVehicleStyle(nextMove.vehicle, '#d56161');
-			console.log("hi");
 		} else {
-			drawVehicleStyle(nextMove.vehicle, '#ffffff');
-			console.log("hia");
+			drawVehicleStyle(nextMove.vehicle, '#508acd');
 		}
 	}
 }
