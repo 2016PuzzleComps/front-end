@@ -66,8 +66,8 @@ function handleLogUpload(evt) {
 	reader.onloadend = function(evt) {
 		if (evt.target.readyState == FileReader.DONE) { // DONE == 2
 			parseLogFile(evt.target.result);
-			
-			validateLog(initialBoard, evt.target.result);
+			// Validate not working at the moment
+			//validateLog(initialBoard, evt.target.result);
 		}
 	};
 	reader.readAsText(file);
@@ -75,7 +75,7 @@ function handleLogUpload(evt) {
 
 /* SERVER STUFF */
 // submit solve log to server
-function submitLog(puzzle, log) {
+function validateLog(puzzle, log) {
 	var oReq = new XMLHttpRequest();
 	// on successful response
 	oReq.addEventListener('load', function() {
@@ -197,7 +197,7 @@ function undoLogMove(lastMove) {
 	if (lastMove.type === 'R') {
 		undoLogReset();
 		return;
-	}
+	} 
 	// remove the vehicle from the prototype
 	board.placeVehicle(lastMove.vehicle, false);
 	if (lastMove.vehicle.horiz) {
@@ -224,6 +224,16 @@ function doLogMove(nextMove) {
 		currentPos = nextMove.vehicle.y;
 	}
 	moveVehicleTo(nextMove.vehicle, currentPos + (nextMove.fpos - nextMove.ipos));
+	if (nextMove.type === 'U') {
+		// Color that car differently
+		if (nextMove.vehicle.isVip) {
+			drawVehicleStyle(nextMove.vehicle, '#d56161');
+			console.log("hi");
+		} else {
+			drawVehicleStyle(nextMove.vehicle, '#ffffff');
+			console.log("hia");
+		}
+	}
 }
 
 // Undoes a reset that was in the log
@@ -332,12 +342,18 @@ var context = canvas.getContext("2d");
 
 // draw a vehicle to the canvas
 function drawVehicle(vehicle) {
-	context.beginPath();
+	var style;
 	if(vehicle.isVip) {
-		context.fillStyle = vipColor;
+		style = vipColor;
 	} else {
-		context.fillStyle = vehicleColor;
+		style = vehicleColor;
 	}
+	drawVehicleStyle(vehicle, style);
+}
+
+function drawVehicleStyle(vehicle, style) {
+	context.beginPath();
+	context.fillStyle = style;
 	if(vehicle.horiz) {
 		context.rect((vehicle.x * squareSize) + borderWidth, (vehicle.y * squareSize) + borderWidth, vehicle.size * squareSize, squareSize);
 	} else {
@@ -490,6 +506,30 @@ function saveBoardToText() {
 	}
 	return text;
 }
+
+// Add keyboard input options
+window.addEventListener("keydown", function (event) {
+  if (event.defaultPrevented) {
+    return; // Do nothing if the event was already processed
+  }
+
+  switch (event.keyCode) {
+	case 37:
+		handleBack();
+		break;
+	case 39:
+		handleForward();
+		break;
+	case 32:
+		togglePlay();
+		break;
+	default:
+		return; // Quit when this doesn't handle the key event.
+  }
+
+  // Cancel the default action to avoid it being handled twice
+  event.preventDefault();
+}, true);
 
 // Set the button actions
 document.getElementById('backButton').onclick = handleBack;
