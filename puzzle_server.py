@@ -98,14 +98,18 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
         query = ('UPDATE puzzles_by_id SET num_solves = (num_solves + 1) WHERE puzzle_id IN (SELECT puzzle_id FROM solve_info WHERE solve_id = %s)', (solve_id,))
         insert_into_database(query)
 
+# TODO: (reilly)
+# write database queries for
+# (1) get puzzle with default user metric
+# (2) get puzzle with user metric appropriate for them based on the 
+#      personal user metric they submitted in their most recent log
+
 # serve puzzles to clients
-@app.route('/puzzle-file', methods=['GET'])
+@app.route('/first-puzzle', methods=['GET'])
 def get_puzzle_file():
     puzzle_id = get_next_puzzle_id()
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
-    solve_id = compute_solve_id(puzzle_id)
-    init_new_solve_info(solve_id, puzzle_id)
-    response = {'success': True, 'solve_id': solve_id, 'puzzle_file': puzzle_file}
+    response = {'success': True, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -124,7 +128,7 @@ def post_log_file():
             puzzle_file = get_puzzle_file_from_database(puzzle_id).strip()
             if solve_log_is_valid(puzzle_file, log_file, status):
                 if status == 1:
-                    response = {'success': True, 'mturk_token': mturk_token}
+                    response = {'success': True}
                 else:
                     response = {'success': True}
                 # put log file in database
