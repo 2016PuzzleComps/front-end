@@ -555,7 +555,7 @@ document.body.addEventListener("touchmove", function (e) {
 	if (e.target == canvas) {
 		e.preventDefault();
 	}
-}, false);
+}, { passive: false}, false);
 
 // DO THE STUFF
 
