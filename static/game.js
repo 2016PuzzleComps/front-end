@@ -18,10 +18,11 @@ var buttonAdded = false;
 var fiveMinutes = false;
 var numMoves = 0;
 
-var solveID;
-
 // open the win tab
 function openFinish(title, body) {
+	document.getElementById("title").innerHTML = title;
+	document.getElementById("body").innerHTML = body;
+	document.getElementById("finish").style.height = "100%";
 }
 
 function waitToQuit() {
@@ -45,23 +46,22 @@ function insertQuitButton() {
 /* SERVER STUFF */
 
 // receive puzzle from server
-function getPuzzleFile() {
+function firstPuzzle() {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
-			solveID = resp.solve_id;
 			loadBoardFromText(resp.puzzle_file);
 		} else {
 			alert(resp.message);
 		}
 	});
-	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle-file");
+	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/first-puzzle");
 	oReq.send(null);
 }
 
 // submit solve log to server
-function submitLog(completed) {
+function nextPuzzle(completed) {
 	var oReq = new XMLHttpRequest();
 	// on successful response
 	oReq.addEventListener('load', function() {
@@ -70,39 +70,27 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
-				// Need to give user the next puzzle
-                loadBoardFromText(resp.puzzle_file);
-                
-                // We should no longer need this stuff
-                /*if(resp.mturk_token) {
-					// if they solved it
-					title = "Success! Here's your MTurk token: ";
-					body = resp.mturk_token;
-				} else {
-					// if they gave up
-					title = "Better luck next time!";
-					body = "";
-				}*/
-
-
+				gameOver = false;
+				loadBoardFromText(resp.puzzle_file);
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
 				body = resp.message;
+				openFinish(title, body);
 			}
 		} else {
 			// if something went wrong on the server
 			title = "Uh oh...";
 			body = this.statusText;
+			openFinish(title, body);
 		}
-		//openFinish(title, body);
 	});
 	// on connection error
 	oReq.addEventListener('error', function() {
 		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
-	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log-file");
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/next-puzzle");
 	var status;
 	if(completed) {
 		status = 1;
@@ -110,9 +98,7 @@ function submitLog(completed) {
 		status = 2;
 	}
 	var msg = {
-		solve_id: solveID,
 		log_file: log,
-        puzzle_file: initialBoard,
 		status: status
 	};
 	oReq.send(JSON.stringify(msg));
@@ -542,11 +528,11 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
-			//openFinish();
+			openFinish();
 			selectedVehicle.x = board.width + 1;
 			drawFrame();
-			//gameOver = true;
-			submitLog(true);
+			gameOver = true;
+			nextPuzzle(true);
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
@@ -572,5 +558,5 @@ document.body.addEventListener("touchmove", function (e) {
 
 // DO THE STUFF
 
-getPuzzleFile();
-//waitToQuit();
+firstPuzzle();
+waitToQuit();
