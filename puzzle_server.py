@@ -18,14 +18,18 @@ def get_index():
 def get_tutorial():
     return flask.render_template('tutorial.html')
 
+# TODO: (reilly)
+# write database queries for
+# (1) get puzzle with default user metric
+# (2) get puzzle with user metric appropriate for them based on the 
+#      personal user metric they submitted in their most recent log
+
 # serve puzzles to clients
-@app.route('/puzzle-file', methods=['GET'])
+@app.route('/first-puzzle', methods=['GET'])
 def get_puzzle_file():
     puzzle_id = get_next_puzzle_id()
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
-    solve_id = compute_solve_id(puzzle_id)
-    init_new_solve_info(solve_id, puzzle_id)
-    response = {'success': True, 'solve_id': solve_id, 'puzzle_file': puzzle_file}
+    response = {'success': True, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
