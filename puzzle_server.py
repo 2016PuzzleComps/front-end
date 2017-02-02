@@ -34,7 +34,7 @@ def get_puzzle_file_from_database(puzzle_id):
 # serve puzzles to clients
 @app.route('/first-puzzle', methods=['GET'])
 def get_puzzle_file():
-    puzzle_id = 100  # this is the puzzle with the median user metric
+    puzzle_id = 8  # this is the puzzle with the median user metric
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
     response = {'success': True, 'puzzle_file': puzzle_file}
     return json.dumps(response)
@@ -67,16 +67,15 @@ def get_next_puzzle(puzzle_solved, log_file, status):
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
     print("Time Taken:", time_taken)
     print("Num Moves:", num_moves)
-    print(puzzle_solved)
+    #print(puzzle_solved)
     query = ('SELECT weighted_walk_length, min_moves FROM user_metric_data WHERE puzzle_file = %s', (puzzle_solved,))
-    print(query)
+    #print(query)
     results = select_from_database(query)
-    print(results[0])
+    #print(results[0])
     weighted_walk_length = results[0][0]
     min_moves = results[0][1]
 
     user_metric = (float(time_taken)*float(num_moves)*float(weighted_walk_length))/float(min_moves)
-    print(user_metric)
 
     user_metric_min = 6632.06807757353
     user_metric_max = 569475.962297654
@@ -89,10 +88,20 @@ def get_next_puzzle(puzzle_solved, log_file, status):
         scaled_user_metric = 100
         new_puzzle_metric = 0
     else:
-        new_puzzle_metric = 25.5314616
-    print(scaled_user_metric)
+        if (scaled_user_metric > 25):
+            difference = scaled_user_metric - 25
+            new_puzzle_metric = 25 - difference
+        else:
+            difference = 25 - scaled_user_metric
+            new_puzzle_metric = 25 + difference
 
-    query = ('SELECT puzzle_file FROM user_metric_data WHERE user_metric_scaled = %s', (new_puzzle_metric,))
+    print("User Metric:", user_metric)
+    print("User Metric Scaled:", scaled_user_metric)
+    print("New Puzzle Metric:", new_puzzle_metric)
+
+
+
+    query = ('SELECT puzzle_file FROM user_metric_data ORDER BY ABS(user_metric_scaled - %s)', (new_puzzle_metric,))
     results = select_from_database(query)
     puzzle_file = results[0][0]
     return puzzle_file
