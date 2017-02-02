@@ -49,7 +49,7 @@ def get_next_puzzle_id():
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    query = ('SELECT puzzle_file FROM puzzles_by_id WHERE puzzle_id = %s', (puzzle_id,))
+    query = ('SELECT puzzle_file FROM user_metric_data WHERE puzzle_id = %s', (puzzle_id,))
     rows = select_from_database(query)
     puzzle_file = rows[0][0]
     return puzzle_file
@@ -105,9 +105,9 @@ def submit_log_file(solve_id, puzzle_id, log_file, status):
 #      personal user metric they submitted in their most recent log
 
 # serve puzzles to clients
-@app.route('/first-puzzle', methods=['GET'])
+@app.route('/puzzle-file', methods=['GET'])
 def get_puzzle_file():
-    puzzle_id = get_next_puzzle_id()
+    puzzle_id = 100  # this is the puzzle with the median user metric
     puzzle_file = get_puzzle_file_from_database(puzzle_id)
     response = {'success': True, 'puzzle_file': puzzle_file}
     return json.dumps(response)
