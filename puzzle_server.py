@@ -117,22 +117,24 @@ def get_puzzle_file():
 def post_log_file():
     try:
         request = json.loads(flask.request.data.decode('utf-8'))
-        solve_id = request['solve_id']
+        #solve_id = request['solve_id']
         status = request['status']
-        solve_info = get_solve_info(solve_id)
+        #solve_info = get_solve_info(solve_id)
         # see if they send a valid solve_id
-        if solve_info:
+        if (1==1):
             # see if the log is valid in light of whether or not they purport to have solved it
             log_file = request['log_file'].strip()
-            puzzle_id, mturk_token = solve_info
-            puzzle_file = get_puzzle_file_from_database(puzzle_id).strip()
+            puzzle_solved = request['puzzle_file']
+            #puzzle_id, mturk_token = solve_info
+            puzzle_file = request['puzzle_file'].strip()
             if solve_log_is_valid(puzzle_file, log_file, status):
                 if status == 1:
-                    response = {'success': True}
+                    puzzle_file = get_next_puzzle(puzzle_solved, log_file)
+                    response = {'success': True, 'puzzle_file': puzzle_file}
                 else:
                     response = {'success': True}
                 # put log file in database
-                submit_log_file(solve_id, puzzle_id, log_file, status)
+                #submit_log_file(solve_id, puzzle_id, log_file, status)
             else:
                 response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
         else:
@@ -141,6 +143,46 @@ def post_log_file():
         response = {'success': False, 'message': "Invalid JSON! What are you up to..."}
     # send response
     return json.dumps(response)
+
+def get_next_puzzle(puzzle_solved, log_file):
+    moves = log_file.split('\n')
+    num_moves = len(moves)
+    first_move = moves[0]
+    last_move = moves[len(moves)-1]
+    time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
+    print("Time Taken:", time_taken)
+    print("Num Moves:", num_moves)
+    print(puzzle_solved)
+    query = ('SELECT weighted_walk_length, min_moves FROM user_metric_data WHERE puzzle_file = %s', (puzzle_solved,))
+    print(query)
+    results = select_from_database(query)
+    print(results[0])
+    weighted_walk_length = results[0][0]
+    min_moves = results[0][1]
+
+    user_metric = (float(time_taken)*float(num_moves)*float(weighted_walk_length))/float(min_moves)
+    print(user_metric)
+
+    user_metric_min = 6632.06807757353
+    user_metric_max = 569475.962297654
+
+    scaled_user_metric = (user_metric - user_metric_min) / (user_metric_max - user_metric_min)
+    if (scaled_user_metric < 0):
+        scaled_user_metric = 0
+        new_puzzle_metric = 100
+    elif (scaled_user_metric > 100):
+        scaled_user_metric = 100
+        new_puzzle_metric = 0
+    else:
+        new_puzzle_metric = 25.5314616
+    print(scaled_user_metric)
+
+    query = ('SELECT puzzle_file FROM user_metric_data WHERE user_metric_scaled = %s', (new_puzzle_metric,))
+    results = select_from_database(query)
+    puzzle_file = results[0][0]
+    return puzzle_file
+
+
 
 def select_from_database(query):
     print(query)

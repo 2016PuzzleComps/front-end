@@ -22,9 +22,6 @@ var solveID;
 
 // open the win tab
 function openFinish(title, body) {
-	document.getElementById("title").innerHTML = title;
-	document.getElementById("body").innerHTML = body;
-	document.getElementById("finish").style.height = "100%";
 }
 
 function waitToQuit() {
@@ -73,7 +70,11 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
-				if(resp.mturk_token) {
+				// Need to give user the next puzzle
+                loadBoardFromText(resp.puzzle_file);
+                
+                // We should no longer need this stuff
+                /*if(resp.mturk_token) {
 					// if they solved it
 					title = "Success! Here's your MTurk token: ";
 					body = resp.mturk_token;
@@ -81,7 +82,9 @@ function submitLog(completed) {
 					// if they gave up
 					title = "Better luck next time!";
 					body = "";
-				}
+				}*/
+
+
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
@@ -92,7 +95,7 @@ function submitLog(completed) {
 			title = "Uh oh...";
 			body = this.statusText;
 		}
-		openFinish(title, body);
+		//openFinish(title, body);
 	});
 	// on connection error
 	oReq.addEventListener('error', function() {
@@ -109,6 +112,7 @@ function submitLog(completed) {
 	var msg = {
 		solve_id: solveID,
 		log_file: log,
+        puzzle_file: initialBoard,
 		status: status
 	};
 	oReq.send(JSON.stringify(msg));
@@ -538,10 +542,10 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
-			openFinish();
+			//openFinish();
 			selectedVehicle.x = board.width + 1;
 			drawFrame();
-			gameOver = true;
+			//gameOver = true;
 			submitLog(true);
 		}
 		// deselect vehicle
@@ -569,4 +573,4 @@ document.body.addEventListener("touchmove", function (e) {
 // DO THE STUFF
 
 getPuzzleFile();
-waitToQuit();
+//waitToQuit();
