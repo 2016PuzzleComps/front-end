@@ -20,9 +20,9 @@ var numMoves = 0;
 
 // open the win tab
 function openFinish(title, body) {
-	document.getElementById("title").innerHTML = title;
-	document.getElementById("body").innerHTML = body;
-	document.getElementById("finish").style.height = "100%";
+	//document.getElementById("title").innerHTML = title;
+	//document.getElementById("body").innerHTML = body;
+	//document.getElementById("finish").style.height = "100%";
 }
 
 function waitToQuit() {
@@ -32,7 +32,7 @@ function waitToQuit() {
 }
 
 function insertQuitButton() {
-	var giveUpButton = document.createElement("giveUpButton");
+	/*var giveUpButton = document.createElement("giveUpButton");
 	var text = document.createTextNode("Give Up");
 	giveUpButton.appendChild(text);
 	giveUpButton.className = "button";
@@ -40,7 +40,7 @@ function insertQuitButton() {
 	buttonDiv = document.getElementById("buttonsDiv");
 	buttonDiv.appendChild(giveUpButton);
 	giveUpButton.onclick = giveUp;
-	buttonAdded = true;
+	buttonAdded = true;*/
 }
 
 /* SERVER STUFF */
@@ -99,7 +99,8 @@ function nextPuzzle(completed) {
 	}
 	var msg = {
 		log_file: log,
-		status: status
+		status: status,
+        puzzle_file: initialBoard
 	};
 	oReq.send(JSON.stringify(msg));
 }
