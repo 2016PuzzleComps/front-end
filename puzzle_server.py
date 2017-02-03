@@ -50,7 +50,8 @@ def post_log_file():
         # see if the log is valid in light of whether or not they purport to have solved it
         log_file = request['log_file'].strip()
         puzzle_id = request['puzzle_id'].strip()
-        if solve_log_is_valid(puzzle_solved, log_file, status):
+        puzzle_file = get_puzzle_file_from_database(puzzle_id)
+        if solve_log_is_valid(puzzle_file, log_file, status):
             solver_id = request.cookies.get('solver_id')
             if not solver_id:
                 response = {'success': False, 'message': 'No solver_id set! How on earth...'}

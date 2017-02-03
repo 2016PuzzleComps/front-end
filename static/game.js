@@ -7,6 +7,7 @@ var borderWidth = 30;
 var borderColor = '#916f25';
 var boardColor = '#e8d39b';
 
+var puzzleID;
 var board;
 var initialBoard = "";
 var log = "";
@@ -20,9 +21,9 @@ var numMoves = 0;
 
 // open the win tab
 function openFinish(title, body) {
-	//document.getElementById("title").innerHTML = title;
-	//document.getElementById("body").innerHTML = body;
-	//document.getElementById("finish").style.height = "100%";
+	document.getElementById("title").innerHTML = title;
+	document.getElementById("body").innerHTML = body;
+	document.getElementById("finish").style.height = "100%";
 }
 
 function waitToQuit() {
@@ -32,7 +33,7 @@ function waitToQuit() {
 }
 
 function insertQuitButton() {
-	/*var giveUpButton = document.createElement("giveUpButton");
+	*var giveUpButton = document.createElement("giveUpButton");
 	var text = document.createTextNode("Give Up");
 	giveUpButton.appendChild(text);
 	giveUpButton.className = "button";
@@ -40,28 +41,29 @@ function insertQuitButton() {
 	buttonDiv = document.getElementById("buttonsDiv");
 	buttonDiv.appendChild(giveUpButton);
 	giveUpButton.onclick = giveUp;
-	buttonAdded = true;*/
+	buttonAdded = true;
 }
 
 /* SERVER STUFF */
 
 // receive puzzle from server
-function firstPuzzle() {
+function getPuzzle() {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener('load', function() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
+			puzzleID = resp.puzzle_id;
 			loadBoardFromText(resp.puzzle_file);
 		} else {
 			alert(resp.message);
 		}
 	});
-	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/first-puzzle");
+	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/puzzle");
 	oReq.send(null);
 }
 
 // submit solve log to server
-function nextPuzzle(completed) {
+function submitLog(completed) {
 	var oReq = new XMLHttpRequest();
 	// on successful response
 	oReq.addEventListener('load', function() {
@@ -90,7 +92,7 @@ function nextPuzzle(completed) {
 		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
-	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/next-puzzle");
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log");
 	var status;
 	if(completed) {
 		status = 1;
@@ -100,7 +102,7 @@ function nextPuzzle(completed) {
 	var msg = {
 		log_file: log,
 		status: status,
-        puzzle_file: initialBoard
+		puzzle_id: puzzleID,
 	};
 	oReq.send(JSON.stringify(msg));
 }
@@ -533,7 +535,8 @@ function deselectVehicle(evt) {
 			selectedVehicle.x = board.width + 1;
 			drawFrame();
 			gameOver = true;
-			nextPuzzle(true);
+			submitLog(true);
+			getPuzzle();
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
@@ -559,5 +562,5 @@ document.body.addEventListener("touchmove", function (e) {
 
 // DO THE STUFF
 
-firstPuzzle();
-waitToQuit();
+getPuzzle();
+// waitToQuit();
