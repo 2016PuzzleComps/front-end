@@ -1,5 +1,6 @@
 import sys
 import flask
+from flask import request, make_response
 import psycopg2
 import json
 import config1 as config
@@ -10,47 +11,52 @@ from validation import *
 
 app = flask.Flask(__name__)
 
+### ROUTES ###
+
 @app.route('/')
 def get_index():
-    return flask.render_template('index.html')
+    resp = make_response(flask.render_template('index.html'))
+    solver_id = request.cookies.get('solver_id')
+    if not solver_id or solver_id not in solvers_table:
+        solver_id = create_new_solver_id(request)
+        resp.set_cookie('solver_id', solver_id)
+        solvers_table[solver_id] = Solver()
+    # resp.set_cookie('solver_id', '')
+    # ^^ for when you want to clear the cookie, for testing purposes
+    return resp
 
 @app.route('/tutorial')
 def get_tutorial():
     return flask.render_template('tutorial.html')
 
-# load puzzle file from db given its ID
-def get_puzzle_file_from_database(puzzle_id):
-    query = ('SELECT puzzle_file FROM user_metric_data WHERE puzzle_id = %s', (puzzle_id,))
-    rows = select_from_database(query)
-    puzzle_file = rows[0][0]
-    return puzzle_file
-
-# TODO: (reilly)
-# write database queries for
-# (1) get puzzle with default user metric
-# (2) get puzzle with user metric appropriate for them based on the 
-#      personal user metric they submitted in their most recent log
-
 # serve puzzles to clients
-@app.route('/first-puzzle', methods=['GET'])
+@app.route('/puzzle', methods=['GET'])
 def get_puzzle_file():
-    puzzle_id = 8  # this is the puzzle with the median user metric
-    puzzle_file = get_puzzle_file_from_database(puzzle_id)
-    response = {'success': True, 'puzzle_file': puzzle_file}
+    solver_id = request.cookies.get('solver_id')
+    if not solver_id:
+        response = {'success': False, 'message': 'No solver_id set! How on earth...'}
+    else:
+        puzzle_id = get_appropriate_puzzle_id(solver_id)
+        puzzle_file = get_puzzle_file_from_database(puzzle_id)
+        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file}
     return json.dumps(response)
 
 # receive new solve log file from client
-@app.route('/next-puzzle', methods=['POST'])
+@app.route('/log', methods=['POST'])
 def post_log_file():
     try:
         request = json.loads(flask.request.data.decode('utf-8'))
         status = request['status']
         # see if the log is valid in light of whether or not they purport to have solved it
         log_file = request['log_file'].strip()
-        puzzle_solved = request['puzzle_file'].strip()
+        puzzle_id = request['puzzle_id'].strip()
         if solve_log_is_valid(puzzle_solved, log_file, status):
-            puzzle_file = get_next_puzzle(puzzle_solved, log_file, status)
-            response = {'success': True, 'puzzle_file': puzzle_file}
+            solver_id = request.cookies.get('solver_id')
+            if not solver_id:
+                response = {'success': False, 'message': 'No solver_id set! How on earth...'}
+            else:
+                update_solvers_table(solver_id, puzzle_id, log_file, status)
+                response = {'success': True}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError:
@@ -58,52 +64,65 @@ def post_log_file():
     # send response
     return json.dumps(response)
 
-def get_next_puzzle(puzzle_solved, log_file, status):
-    # TODO: take into account whether or not they gave up
+### DATA ###
+
+# dictionary that stores info about each solver
+solvers_table = {}
+
+# object to store info about a solver
+class Solver:
+    def __init__(self):
+        self.num_solves = 0
+        self.score = None
+    def update(self, newest_score):
+        # DO STUFF (I will figure out later)
+        pass
+
+### HELPER FUNCTIONS ###
+
+# create a new cookie value to remember the solver by
+def create_new_solver_id(request):
+    food = str(request.user_agent) + str(time.time())
+    m = hashlib.md5()
+    m.update(food.encode('UTF-8'))
+    return m.hexdigest()
+
+# gets id of a good next puzzle for a solver based on their solver score
+def get_appropriate_puzzle_id(solver_id):
+    pass
+    # DO STUFF (I will figure out later)
+
+# update the score of a solver after they've solved a puzzle
+def update_solvers_table(solver_id, puzzle_id, log_file, status):
+    puzzle_score = get_puzzle_score(puzzle_id)
+    log_score = get_log_score(log_file)
+    # DO STUFF (I will figure out later)
+
+def get_puzzle_score(puzzle_id):
+    query = "SELET min_moves, weighted_walk_length FROM puzzle_info WHERE puzzle_id = '%s'"
+    results = select_from_database(query, puzzle_id)
+    min_moves, weighted_walk_length = results[0]
+    # NEED COEFFICIENTS
+    alpha = 1
+    beta = 1
+    return alpha * min_moves + beta * weighted_walk_length
+
+def get_log_score(log_file):
     moves = log_file.split('\n')
-    num_moves = len(moves)
     first_move = moves[0]
-    last_move = moves[len(moves)-1]
+    last_move = moves[-1]
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
-    print("Time Taken:", time_taken)
-    print("Num Moves:", num_moves)
-    #print(puzzle_solved)
-    query = ('SELECT weighted_walk_length, min_moves FROM user_metric_data WHERE puzzle_file = %s', (puzzle_solved,))
-    #print(query)
-    results = select_from_database(query)
-    #print(results[0])
-    weighted_walk_length = results[0][0]
-    min_moves = results[0][1]
+    # NEED COEFFICIENTS
+    ceta = 1
+    deta = 1
+    c = 0
+    return ceta * len(moves) + deta * time_taken + c
 
-    user_metric = (float(time_taken)*float(num_moves)*float(weighted_walk_length))/float(min_moves)
-
-    user_metric_min = 6632.06807757353
-    user_metric_max = 569475.962297654
-
-    scaled_user_metric = (user_metric - user_metric_min) / (user_metric_max - user_metric_min)
-    if (scaled_user_metric < 0):
-        scaled_user_metric = 0
-        new_puzzle_metric = 100
-    elif (scaled_user_metric > 100):
-        scaled_user_metric = 100
-        new_puzzle_metric = 0
-    else:
-        if (scaled_user_metric > 25):
-            difference = scaled_user_metric - 25
-            new_puzzle_metric = 25 - difference
-        else:
-            difference = 25 - scaled_user_metric
-            new_puzzle_metric = 25 + difference
-
-    print("User Metric:", user_metric)
-    print("User Metric Scaled:", scaled_user_metric)
-    print("New Puzzle Metric:", new_puzzle_metric)
-
-
-
-    query = ('SELECT puzzle_file FROM user_metric_data ORDER BY ABS(user_metric_scaled - %s)', (new_puzzle_metric,))
-    results = select_from_database(query)
-    puzzle_file = results[0][0]
+# load puzzle file from db given its ID
+def get_puzzle_file_from_database(puzzle_id):
+    query = ('SELECT puzzle_file FROM user_metric_data WHERE puzzle_id = %s', (puzzle_id,))
+    rows = select_from_database(query)
+    puzzle_file = rows[0][0]
     return puzzle_file
 
 def select_from_database(query):
