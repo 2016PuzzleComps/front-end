@@ -53,6 +53,7 @@ function getPuzzle() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
+			gameOver = false;
 			loadBoardFromText(resp.puzzle_file);
 		} else {
 			alert(resp.message);
@@ -73,8 +74,7 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
-				gameOver = false;
-				loadBoardFromText(resp.puzzle_file);
+				getPuzzle();
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
