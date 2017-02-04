@@ -90,7 +90,6 @@ function submitLog(completed) {
 	});
 	// on connection error
 	oReq.addEventListener('error', function() {
-		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
 	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log");
@@ -532,7 +531,6 @@ function deselectVehicle(evt) {
 		drawFrame();
 		// check for victory and output code
 		if(selectedVehicle.isVip && selectedVehicle.x >= board.width - selectedVehicle.size + 1) {
-			openFinish();
 			selectedVehicle.x = board.width + 1;
 			drawFrame();
 			gameOver = true;
