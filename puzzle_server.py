@@ -49,7 +49,7 @@ def post_log_file():
         status = request['status']
         # see if the log is valid in light of whether or not they purport to have solved it
         log_file = request['log_file'].strip()
-        puzzle_id = request['puzzle_id'].strip()
+        puzzle_id = request['puzzle_id']
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
         if solve_log_is_valid(puzzle_file, log_file, status):
             solver_id = request.cookies.get('solver_id')
@@ -90,8 +90,8 @@ def create_new_solver_id(request):
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
-    pass
     # DO STUFF (I will figure out later)
+    return 100
 
 # update the score of a solver after they've solved a puzzle
 def update_solvers_table(solver_id, puzzle_id, log_file, status):
@@ -122,7 +122,9 @@ def get_log_score(log_file):
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
     query = ('SELECT puzzle_file FROM user_metric_data WHERE puzzle_id = %s', (puzzle_id,))
+    print(puzzle_id)
     rows = select_from_database(query)
+    print(rows)
     puzzle_file = rows[0][0]
     return puzzle_file
 
