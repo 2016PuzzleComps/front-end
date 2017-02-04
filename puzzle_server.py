@@ -16,6 +16,7 @@ app = flask.Flask(__name__)
 @app.route('/')
 def get_index():
     resp = make_response(flask.render_template('index.html'))
+    print(request.cookies)
     solver_id = request.cookies.get('solver_id')
     if not solver_id or solver_id not in solvers_table:
         solver_id = create_new_solver_id(request)
@@ -42,7 +43,7 @@ def get_puzzle_file():
     return json.dumps(response)
 
 # receive new solve log file from client
-@app.route('/log', methods=['POST'])
+@app.route('/log', methods=['GET'])
 def post_log_file():
     try:
         request = json.loads(flask.request.data.decode('utf-8'))
@@ -100,8 +101,8 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     # DO STUFF (I will figure out later)
 
 def get_puzzle_score(puzzle_id):
-    query = "SELET min_moves, weighted_walk_length FROM puzzle_info WHERE puzzle_id = '%s'"
-    results = select_from_database(query, puzzle_id)
+    query = ("SELET min_moves, weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
+    results = select_from_database(query)
     min_moves, weighted_walk_length = results[0]
     # NEED COEFFICIENTS
     alpha = 1
@@ -121,15 +122,14 @@ def get_log_score(log_file):
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
-    query = ('SELECT puzzle_file FROM user_metric_data WHERE puzzle_id = %s', (puzzle_id,))
-    print(puzzle_id)
+    query = ("SELECT puzzle_file FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
+    print("QUERY: " + str(query))
     rows = select_from_database(query)
-    print(rows)
+    print("ROWS: " + str(rows))
     puzzle_file = rows[0][0]
     return puzzle_file
 
 def select_from_database(query):
-    print(query)
     cursor.execute(query[0], query[1])
     return cursor.fetchall()
 

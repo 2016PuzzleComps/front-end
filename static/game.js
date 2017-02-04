@@ -65,6 +65,7 @@ function getPuzzle() {
 // submit solve log to server
 function submitLog(completed) {
 	var oReq = new XMLHttpRequest();
+    oReq.withCredentials = true;
 	// on successful response
 	oReq.addEventListener('load', function() {
 		var title;
@@ -92,7 +93,7 @@ function submitLog(completed) {
 		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
-	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log");
+	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/log");
 	var status;
 	if(completed) {
 		status = 1;
