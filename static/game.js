@@ -93,7 +93,7 @@ function submitLog(completed) {
 		console.log('error');
 		openFinish("Uh oh...", "The server seems to be down. Try again later?");
 	});
-	oReq.open("GET", "http://" + window.location.hostname + ":" + window.location.port + "/log");
+	oReq.open("POST", "http://" + window.location.hostname + ":" + window.location.port + "/log");
 	var status;
 	if(completed) {
 		status = 1;

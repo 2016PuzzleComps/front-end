@@ -11,12 +11,9 @@ from validation import *
 
 app = flask.Flask(__name__)
 
-### ROUTES ###
-
 @app.route('/')
 def get_index():
     resp = make_response(flask.render_template('index.html'))
-    print(request.cookies)
     solver_id = request.cookies.get('solver_id')
     if not solver_id or solver_id not in solvers_table:
         solver_id = create_new_solver_id(request)
@@ -43,14 +40,14 @@ def get_puzzle_file():
     return json.dumps(response)
 
 # receive new solve log file from client
-@app.route('/log', methods=['GET'])
+@app.route('/log', methods=['POST'])
 def post_log_file():
     try:
-        request = json.loads(flask.request.data.decode('utf-8'))
-        status = request['status']
+        request_json = json.loads(flask.request.data.decode('utf-8'))
+        status = request_json['status']
         # see if the log is valid in light of whether or not they purport to have solved it
-        log_file = request['log_file'].strip()
-        puzzle_id = request['puzzle_id']
+        log_file = request_json['log_file'].strip()
+        puzzle_id = request_json['puzzle_id']
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
         if solve_log_is_valid(puzzle_file, log_file, status):
             solver_id = request.cookies.get('solver_id')
@@ -61,7 +58,7 @@ def post_log_file():
                 response = {'success': True}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
-    except json.decoder.JSONDecodeError:
+    except json.decoder.JSONDecodeError as e:
         response = {'success': False, 'message': "Invalid JSON! What are you up to..."}
     # send response
     return json.dumps(response)
@@ -101,7 +98,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     # DO STUFF (I will figure out later)
 
 def get_puzzle_score(puzzle_id):
-    query = ("SELET min_moves, weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
+    query = ("SELECT min_moves, weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     results = select_from_database(query)
     min_moves, weighted_walk_length = results[0]
     # NEED COEFFICIENTS
