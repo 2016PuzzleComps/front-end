@@ -103,7 +103,7 @@ function submitLog(completed) {
 	var msg = {
 		log_file: log,
 		status: status,
-		puzzle_id: puzzleID,
+		puzzle_id: puzzleID
 	};
 	oReq.send(JSON.stringify(msg));
 }
