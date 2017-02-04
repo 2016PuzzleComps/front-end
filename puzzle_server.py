@@ -127,17 +127,18 @@ def get_puzzle_file_from_database(puzzle_id):
     return puzzle_file
 
 def select_from_database(query):
-    cursor.execute(query[0], query[1])
-    return cursor.fetchall()
-
-if __name__ == '__main__':
     try:
         connection = psycopg2.connect(user=config.username, password=config.password)
         cursor = connection.cursor()
+        cursor.execute(query[0], query[1])
+        rows = cursor.fetchall()
+        connection.close()
+        return rows
     except Exception as e:
         print(e)
         exit(1)
+
+if __name__ == '__main__':
     host = sys.argv[1]
     port = int(sys.argv[2])
     app.run(host=host, port=port, threaded = True)
-    connection.close()
