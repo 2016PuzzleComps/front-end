@@ -102,11 +102,11 @@ def get_appropriate_puzzle_id(solver_id):
 def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     rows = select_from_database(query)
-    weighted_walk_length = rows[0]
+    weighted_walk_length = int(rows[0][0])
     alpha = 7.25
     beta = -0.014
     c = 171.24
-    return alpha * weighted_walk_length + beta * (weighted_walk_length**2) + c
+    return (alpha * weighted_walk_length) + (beta * weighted_walk_length * weighted_walk_length) + c
 
 def get_log_score(log_file):
     moves = log_file.split('\n')
@@ -116,7 +116,7 @@ def get_log_score(log_file):
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
     ceta = .5
     deta = 6
-    return ceta * time_taken + deta * num_moves 
+    return (ceta * time_taken) + (deta * num_moves)
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
