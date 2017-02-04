@@ -33,7 +33,7 @@ function waitToQuit() {
 }
 
 function insertQuitButton() {
-	*var giveUpButton = document.createElement("giveUpButton");
+	var giveUpButton = document.createElement("giveUpButton");
 	var text = document.createTextNode("Give Up");
 	giveUpButton.appendChild(text);
 	giveUpButton.className = "button";
