@@ -80,7 +80,7 @@ class Solver:
         self.num_solves += 1
         self.ratio /= self.num_solves
     def get_solver_score(self):
-        return this.ratio
+        return self.ratio
 
 ### HELPER FUNCTIONS ###
 
@@ -103,7 +103,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
-    ideal_score = 1000 # TODO: figure out what we want the 'ideal' puzzle/log score to be
+    ideal_score = 500 # TODO: figure out what we want the 'ideal' puzzle/log score to be
     if solver.num_solves == 0:
         target_puzzle_score = ideal_score
     else:
