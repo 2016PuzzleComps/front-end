@@ -71,14 +71,13 @@ solvers_table = {}
 
 # object to store info about a solver
 class Solver:
-    discount = 1 # later
     def __init__(self):
         self.num_solves = 0
         self.ratio = 1
     def update(self, puzzle_score, log_score):
         # weighted average of sqrt'ed ratios, weighting newer ones higher
         new_ratio = math.sqrt(puzzle_score/log_score)
-        self.ratio = (self.ratio*discount*self.num_solves + new_ratio)/(self.num_solves + 1)
+        self.ratio = (self.ratio*self.num_solves + new_ratio)/(self.num_solves + 1)
         self.num_solves += 1
     def get_solver_score(self):
         return self.ratio
