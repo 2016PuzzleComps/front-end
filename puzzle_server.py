@@ -74,11 +74,12 @@ class Solver:
         self.num_solves = 0
         self.ratio = 0.0
     def update(self, puzzle_score, log_score):
+        # currently just doing a cumulative average of ratios
         self.ratio *= self.num_solves
         self.ratio += puzzle_score/log_score
         self.num_solves += 1
         self.ratio /= self.num_solves
-    def score(self):
+    def get_solver_score(self):
         return this.ratio
 
 ### HELPER FUNCTIONS ###
@@ -102,10 +103,14 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
+    ideal_score = 1000 # TODO: figure out what we want the 'ideal' puzzle/log score to be
     if solver.num_solves == 0:
-        return 100 # TODO: figure out best starting point
+        target_puzzle_score = ideal_score
     else:
-        query = ("SELECT puzzle_id FROM puzzles WHERE ") # TODO: reilly help
+        target_puzzle_score = ideal_score * solver.get_solver_score()
+    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((7.52*weighted_walk_length) - (0.014*(weighted_walk_length^2)) + 171.24) - %s);", (target_puzzle_score,))
+    rows = select_from_database(query)
+    return rows[0][0]
 
 def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
