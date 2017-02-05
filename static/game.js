@@ -53,6 +53,7 @@ function getPuzzle() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
+			console.log(resp.stats);
 			gameOver = false;
 			loadBoardFromText(resp.puzzle_file);
 		} else {

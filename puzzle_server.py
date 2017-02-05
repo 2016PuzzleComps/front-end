@@ -7,6 +7,7 @@ import config1 as config
 import hashlib
 import time
 import random
+import math
 from validation import *
 
 app = flask.Flask(__name__)
@@ -36,7 +37,7 @@ def get_puzzle_file():
     else:
         puzzle_id = get_appropriate_puzzle_id(solver_id)
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
-        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file}
+        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': get_puzzle_score(puzzle_id)}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -55,7 +56,7 @@ def post_log_file():
                 response = {'success': False, 'message': 'No solver_id set!'}
             else:
                 stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
-                response = {'success': True, 'stats': stats}
+                response = {'success': True, 'stats': get_log_score(log_file)}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:
@@ -70,15 +71,15 @@ solvers_table = {}
 
 # object to store info about a solver
 class Solver:
+    discount = 1 # later
     def __init__(self):
         self.num_solves = 0
-        self.ratio = 0.0
+        self.ratio = 1
     def update(self, puzzle_score, log_score):
-        # currently just doing a cumulative average of ratios
-        self.ratio *= self.num_solves
-        self.ratio += puzzle_score/log_score
+        # weighted average of sqrt'ed ratios, weighting newer ones higher
+        new_ratio = math.sqrt(puzzle_score/log_score)
+        self.ratio = (self.ratio*discount*self.num_solves + new_ratio)/(self.num_solves + 1)
         self.num_solves += 1
-        self.ratio /= self.num_solves
     def get_solver_score(self):
         return self.ratio
 
@@ -99,7 +100,6 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_score, log_score)
-    return {'puzzle_score': puzzle_score, 'log_score': log_score}
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
