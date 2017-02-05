@@ -72,10 +72,14 @@ solvers_table = {}
 class Solver:
     def __init__(self):
         self.num_solves = 0
-        self.score = None
-    def update(self, newest_score):
-        # DO STUFF (I will figure out later)
-        pass
+        self.ratio = 0.0
+    def update(self, puzzle_score, log_score):
+        self.ratio *= self.num_solves
+        self.ratio += puzzle_score/log_score
+        self.num_solves += 1
+        self.ratio /= self.num_solves
+    def score(self):
+        return this.ratio
 
 ### HELPER FUNCTIONS ###
 
@@ -88,16 +92,20 @@ def create_new_solver_id(request):
 
 # update the score of a solver after they've solved a puzzle
 def update_solvers_table(solver_id, puzzle_id, log_file, status):
+    solver = solvers_table[solver_id]
     puzzle_score = get_puzzle_score(puzzle_id)
     log_score = get_log_score(log_file)
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
-    # DO STUFF (I will figure out later)
+    solver.update(puzzle_score, log_score)
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
-    # DO STUFF (I will figure out later)
-    return 100
+    solver = solvers_table[solver_id]
+    if solver.num_solves == 0:
+        return 100 # TODO: figure out best starting point
+    else:
+        query = ("SELECT puzzle_id FROM puzzles WHERE ") # TODO: reilly help
 
 def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
