@@ -56,7 +56,7 @@ function getPuzzle() {
 			console.log(resp.stats);
 			gameOver = false;
 			log = "";
-			moveList = "";
+			moveList = [];
 			loadBoardFromText(resp.puzzle_file);
 		} else {
 			alert(resp.message);
