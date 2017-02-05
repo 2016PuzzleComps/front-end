@@ -54,8 +54,8 @@ def post_log_file():
             if not solver_id:
                 response = {'success': False, 'message': 'No solver_id set!'}
             else:
-                update_solvers_table(solver_id, puzzle_id, log_file, status)
-                response = {'success': True}
+                stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
+                response = {'success': True, 'stats': stats}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:
@@ -99,6 +99,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_score, log_score)
+    return {'puzzle_score': puzzle_score, 'log_score': log_score}
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
@@ -140,12 +141,12 @@ def get_puzzle_file_from_database(puzzle_id):
 
 def select_from_database(query):
     try:
-        print("QUERY: " + str(query))
+        # print("QUERY: " + str(query))
         connection = psycopg2.connect(user=config.username, password=config.password)
         cursor = connection.cursor()
         cursor.execute(query[0], query[1])
         rows = cursor.fetchall()
-        print("ROWS: " + str(rows))
+        # print("ROWS: " + str(rows))
         connection.close()
         return rows
     except Exception as e:

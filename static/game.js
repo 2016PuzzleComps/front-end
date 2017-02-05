@@ -74,6 +74,7 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
+				console.log(resp.stats);
 				getPuzzle();
 			} else {
 				// if they tried to cheat
