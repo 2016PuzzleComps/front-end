@@ -56,7 +56,7 @@ def post_log_file():
                 response = {'success': False, 'message': 'No solver_id set!'}
             else:
                 stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
-                response = {'success': True, 'stats': {'log_score': get_log_score(log_file)}}
+                response = {'success': True, 'stats': {'log_score': get_log_score(log_file), 'solver_score': solvers_table[solver_id].get_solver_score()}}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:
@@ -99,10 +99,10 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     solver = solvers_table[solver_id]
     puzzle_score = get_puzzle_score(puzzle_id)
     log_score = get_log_score(log_file)
+    print("puzzle id: " + str(puzzle_id))
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_score, log_score)
-    print("Puzzle ID: " + str(puzzle_id))
     solver.add_completed_puzzle(puzzle_id)
 
 # gets id of a good next puzzle for a solver based on their solver score
