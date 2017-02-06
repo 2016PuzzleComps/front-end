@@ -96,7 +96,6 @@ function submitLog(completed) {
 			if(resp.success) {
 				console.log(resp.stats);
                 winPage("Puzzle Complete", "Based off your last solve, we recommend this puzzle");
-				//getPuzzle();
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
@@ -557,7 +556,6 @@ function deselectVehicle(evt) {
 			drawFrame();
 			gameOver = true;
 			submitLog(true);
-			getPuzzle();
 		}
 		// deselect vehicle
 		selectedVehicleIndex = null;
