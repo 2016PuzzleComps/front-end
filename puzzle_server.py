@@ -74,6 +74,7 @@ class Solver:
     def __init__(self):
         self.num_solves = 0
         self.ratio = 1
+        self.completedPuzzles = []
     def update(self, puzzle_score, log_score):
         # weighted average of sqrt'ed ratios, weighting newer ones higher
         new_ratio = math.sqrt(puzzle_score/log_score)
@@ -81,6 +82,8 @@ class Solver:
         self.num_solves += 1
     def get_solver_score(self):
         return self.ratio
+    def add_completed_puzzle(self, puzzle_id):
+        self.completedPuzzles.append(puzzle_id)
 
 ### HELPER FUNCTIONS ###
 
@@ -99,6 +102,8 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_score, log_score)
+    print("Puzzle ID: " + str(puzzle_id))
+    solver.add_completed_puzzle(puzzle_id)
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
@@ -108,9 +113,15 @@ def get_appropriate_puzzle_id(solver_id):
         target_puzzle_score = ideal_score
     else:
         target_puzzle_score = ideal_score * solver.get_solver_score()
-    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((7.52*weighted_walk_length) - (0.014*(weighted_walk_length^2)) + 171.24) - %s);", (target_puzzle_score,))
+    target_puzzle_score = 500
+    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((7.52*weighted_walk_length) - (0.014*(weighted_walk_length^2)) + 171.24) - %s) LIMIT 100;", (target_puzzle_score,))
     rows = select_from_database(query)
-    return rows[0][0]
+    #makes sure user doesn't receive already solved puzzle
+    i=0
+    while rows[i][0] in solver.completedPuzzles:
+        i = i+1
+    print (rows[i][0])
+    return rows[i][0]
 
 def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
