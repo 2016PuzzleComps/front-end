@@ -26,6 +26,23 @@ function openFinish(title, body) {
 	document.getElementById("finish").style.height = "100%";
 }
 
+function winPage(title, body) {
+    document.getElementById("title").innerHTML = title;
+    document.getElementById("body").innerHTML = body;
+    document.getElementById("finish").style.height = "100%";
+    //var btn = document.createElement("nextPuzzleBtn");
+    //var text = document.createTextNode("Next Puzzle");
+    //btn.appendChild(text);
+    //document.getElementById("button-div").appendChild(btn);
+    document.getElementById("nextPuzzle").onclick = nextPuzzle;
+}
+
+function nextPuzzle() {
+    document.getElementById("finish").style.height = "0%";
+    getPuzzle();
+}
+
+
 function waitToQuit() {
 	setTimeout(function() { 
 		fiveMinutes = true; 
@@ -78,7 +95,8 @@ function submitLog(completed) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
 				console.log(resp.stats);
-				getPuzzle();
+                winPage("Puzzle Complete", "Based off your last solve, we recommend this puzzle");
+				//getPuzzle();
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
