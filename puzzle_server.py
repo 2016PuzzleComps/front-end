@@ -114,22 +114,21 @@ def get_appropriate_puzzle_id(solver_id):
     else:
         target_puzzle_score = ideal_score * solver.get_solver_score()
     target_puzzle_score = 500
-    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((7.52*weighted_walk_length) - (0.014*(weighted_walk_length^2)) + 171.24) - %s) LIMIT 100;", (target_puzzle_score,))
+    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 100;", (target_puzzle_score,))
     rows = select_from_database(query)
     #makes sure user doesn't receive already solved puzzle
     i=0
     while rows[i][0] in solver.completedPuzzles:
         i = i+1
-    print (rows[i][0])
     return rows[i][0]
 
 def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     rows = select_from_database(query)
     weighted_walk_length = int(rows[0][0])
-    alpha = 7.25
-    beta = -0.014
-    c = 171.24
+    alpha = 6.51
+    beta = -0.01
+    c = 221.89
     return (alpha * weighted_walk_length) + (beta * weighted_walk_length * weighted_walk_length) + c
 
 def get_log_score(log_file):
