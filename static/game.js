@@ -8,6 +8,7 @@ var borderColor = '#916f25';
 var boardColor = '#e8d39b';
 
 var puzzleID;
+var puzzleDiff;  // for testing purposes
 var board;
 var initialBoard = "";
 var log = "";
@@ -26,14 +27,11 @@ function openFinish(title, body) {
 	document.getElementById("finish").style.height = "100%";
 }
 
-function winPage(title, body) {
+function winPage(title, body, stats) {
     document.getElementById("title").innerHTML = title;
     document.getElementById("body").innerHTML = body;
+    document.getElementById("stats").innerHTML = stats;
     document.getElementById("finish").style.height = "100%";
-    //var btn = document.createElement("nextPuzzleBtn");
-    //var text = document.createTextNode("Next Puzzle");
-    //btn.appendChild(text);
-    //document.getElementById("button-div").appendChild(btn);
     document.getElementById("nextPuzzle").onclick = nextPuzzle;
 }
 
@@ -71,6 +69,8 @@ function getPuzzle() {
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
 			console.log(resp.stats);
+            puzzleDiff = resp.stats.puzzle_score;
+            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff
 			gameOver = false;
 			log = "";
 			moveList = [];
@@ -95,7 +95,7 @@ function submitLog(completed) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
 				console.log(resp.stats);
-                winPage("Puzzle Complete", "Based off your last solve, we recommend this puzzle");
+                winPage("Puzzle Complete", "Based off your last solve, we recommend this puzzle", "Puzzle Difficulty: " + puzzleDiff.toString() + " | Your Solve Difficulty: " +  resp.stats.log_score);
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";

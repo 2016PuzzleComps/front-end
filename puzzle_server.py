@@ -113,7 +113,7 @@ def get_appropriate_puzzle_id(solver_id):
         target_puzzle_score = ideal_score
     else:
         target_puzzle_score = ideal_score * solver.get_solver_score()
-    target_puzzle_score = 500
+    #target_puzzle_score = 500
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 100;", (target_puzzle_score,))
     rows = select_from_database(query)
     #makes sure user doesn't receive already solved puzzle
