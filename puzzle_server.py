@@ -28,7 +28,7 @@ def get_tutorial():
     return flask.render_template('tutorial.html')
 
 # delete a solver's solve history
-@app.route('/solver_history', method=['DELETE'])
+@app.route('/solver_history', methods=['DELETE'])
 def reset_solve_history():
     solver_id = request.cookies.get('solver_id')
     if not solver_id:
@@ -134,6 +134,7 @@ def get_appropriate_puzzle_id(solver_id):
     # makes sure user doesn't receive already solved puzzle
     i=0
     while rows[i][0] in solver.completed_puzzles:
+        print("skipping...")
         i = i+1
     return rows[i][0]
 
