@@ -21,13 +21,22 @@ def get_index():
         solver_id = create_new_solver_id(request)
         resp.set_cookie('solver_id', solver_id)
         solvers_table[solver_id] = Solver()
-    # resp.set_cookie('solver_id', '')
-    # ^^ for when you want to clear the cookie, for testing purposes
     return resp
 
 @app.route('/tutorial')
 def get_tutorial():
     return flask.render_template('tutorial.html')
+
+# delete a solver's solve history
+@app.route('/solver_history', method=['DELETE'])
+def reset_solve_history():
+    solver_id = request.cookies.get('solver_id')
+    if not solver_id:
+        response = {'success': False, 'message': 'No solver_id set!'}
+    else:
+        del solvers_table[solver_id]
+        response = {'success': True}
+    return json.dumps(response)
 
 # serve puzzles to clients
 @app.route('/puzzle', methods=['GET'])

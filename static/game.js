@@ -61,6 +61,23 @@ function insertQuitButton() {
 
 /* SERVER STUFF */
 
+// reset solve history
+function resetSolveHistory() {
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener('load', function() {
+		resp = JSON.parse(this.responseText);
+		if(resp.success) {
+			console.log(resp.stats);
+			solverID = resp.old_solver_id;
+		} else {
+			alert(resp.message);
+		}
+	});
+	oReq.open("DELETE", "http://" + window.location.hostname + ":" + window.location.port + "/solver_history");
+	oReq.send(null);
+	document.cookie = "solver_id=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+}
+
 // receive puzzle from server
 function getPuzzle() {
 	var oReq = new XMLHttpRequest();
