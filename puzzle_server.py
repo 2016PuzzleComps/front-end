@@ -8,6 +8,7 @@ import hashlib
 import time
 import random
 import math
+import pickle
 from validation import *
 
 app = flask.Flask(__name__)
@@ -175,4 +176,13 @@ def select_from_database(query):
 if __name__ == '__main__':
     host = sys.argv[1]
     port = int(sys.argv[2])
-    app.run(host=host, port=port, threaded = True)
+    # restore solvers_table from pickled file
+    solvers_table_file = open("solvers_table.pickle", "w+")
+    try:
+        pickle.load(solvers_table, solvers_table_file)
+    except:
+        pass
+    try:
+        app.run(host=host, port=port, threaded = True)
+    except KeyboardInterrupt:
+        pickle.dump(solvers_table, solvers_table_file)
