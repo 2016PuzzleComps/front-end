@@ -69,6 +69,13 @@ def post_log_file():
 # dictionary that stores info about each solver
 solvers_table = {}
 
+# correlation coefficients
+wwf_coef = 6.51
+wwf2_coef = -0.01
+puzzle_score_offset = 221.89
+time_taken_coef = .5
+num_moves_coef = 6
+
 # object to store info about a solver
 class Solver:
     def __init__(self):
@@ -76,6 +83,7 @@ class Solver:
         self.ratio = 1
         self.completed_puzzles = set()
     def update(self, puzzle_id, puzzle_score, log_score):
+        self.completed_puzzles.add(puzzle_id)
         # weighted average of sqrt'ed ratios, weighting newer ones higher
         new_ratio = math.sqrt(puzzle_score/log_score)
         self.ratio = (self.ratio*self.num_solves + new_ratio)/(self.num_solves + 1)
@@ -123,10 +131,7 @@ def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     rows = select_from_database(query)
     weighted_walk_length = int(rows[0][0])
-    alpha = 6.51
-    beta = -0.01
-    c = 221.89
-    return (alpha * weighted_walk_length) + (beta * weighted_walk_length * weighted_walk_length) + c
+    return (wwf_coef * weighted_walk_length) + (wwf2_coef * weighted_walk_length * weighted_walk_length) + puzzle_score_offset
 
 def get_log_score(log_file):
     moves = log_file.split('\n')
@@ -134,9 +139,7 @@ def get_log_score(log_file):
     first_move = moves[0]
     last_move = moves[-1]
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
-    ceta = .5
-    deta = 6
-    return (ceta * time_taken) + (deta * num_moves)
+    return (time_taken_coef * time_taken) + (num_moves_coef * num_moves)
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
