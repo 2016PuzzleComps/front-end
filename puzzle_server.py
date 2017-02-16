@@ -10,6 +10,7 @@ import random
 import math
 import pickle
 from validation import *
+from mle import MLE
 
 app = flask.Flask(__name__)
 
@@ -79,6 +80,12 @@ def post_log_file():
 # dictionary that stores info about each solver
 solvers_table = {}
 
+# ideal score
+ideal_score = 500
+max_score = 1000 # TODO: fine-tune this
+norm_spread = 5 # TODO: fine-tune this
+mle = MLE(max_score, norm_spread)
+
 # correlation coefficients
 wwf_coef = 6.51
 wwf2_coef = -0.01
@@ -89,17 +96,17 @@ num_moves_coef = 6
 # object to store info about a solver
 class Solver:
     def __init__(self):
-        self.num_solves = 0
-        self.ratio = 1
+        self.true_skill = ideal_score
+        self.solve_scores = []
+        self.log_scores = []
         self.completed_puzzles = set()
-    def update(self, puzzle_id, puzzle_score, log_score):
+    def update(self, puzzle_id, puzzle_score, solve_score):
         self.completed_puzzles.add(puzzle_id)
-        # weighted average of sqrt'ed ratios, weighting newer ones higher
-        new_ratio = math.sqrt(puzzle_score/log_score)
-        self.ratio = (self.ratio*self.num_solves + new_ratio)/(self.num_solves + 1)
-        self.num_solves += 1
+        self.puzzle_scores.append(puzzle_score)
+        self.solve_scores.append(log_score)
+        self.true_skill = mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
     def get_solver_score(self):
-        return self.ratio
+        return self.true_skill
 
 ### HELPER FUNCTIONS ###
 
@@ -123,12 +130,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
-    ideal_score = 500 # TODO: figure out what we want the 'ideal' puzzle/log score to be
-    if solver.num_solves == 0:
-        target_puzzle_score = ideal_score
-    else:
-        target_puzzle_score = ideal_score * solver.get_solver_score()
-    #target_puzzle_score = 500
+    target_puzzle_score = solver.get_solver_score()
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 500;", (target_puzzle_score,))
     rows = select_from_database(query)
     # makes sure user doesn't receive already solved puzzle
