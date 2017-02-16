@@ -97,13 +97,13 @@ num_moves_coef = 6
 class Solver:
     def __init__(self):
         self.true_skill = ideal_score
+        self.puzzle_scores = []
         self.solve_scores = []
-        self.log_scores = []
         self.completed_puzzles = set()
     def update(self, puzzle_id, puzzle_score, solve_score):
         self.completed_puzzles.add(puzzle_id)
         self.puzzle_scores.append(puzzle_score)
-        self.solve_scores.append(log_score)
+        self.solve_scores.append(solve_score)
         self.true_skill = mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
     def get_solver_score(self):
         return self.true_skill
