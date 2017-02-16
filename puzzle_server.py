@@ -8,6 +8,7 @@ import hashlib
 import time
 import random
 import math
+import pickle
 from validation import *
 
 app = flask.Flask(__name__)
@@ -20,13 +21,22 @@ def get_index():
         solver_id = create_new_solver_id(request)
         resp.set_cookie('solver_id', solver_id)
         solvers_table[solver_id] = Solver()
-    # resp.set_cookie('solver_id', '')
-    # ^^ for when you want to clear the cookie, for testing purposes
     return resp
 
 @app.route('/tutorial')
 def get_tutorial():
     return flask.render_template('tutorial.html')
+
+# delete a solver's solve history
+@app.route('/solver_history', methods=['DELETE'])
+def reset_solve_history():
+    solver_id = request.cookies.get('solver_id')
+    if not solver_id:
+        response = {'success': False, 'message': 'No solver_id set!'}
+    else:
+        del solvers_table[solver_id]
+        response = {'success': True}
+    return json.dumps(response)
 
 # serve puzzles to clients
 @app.route('/puzzle', methods=['GET'])
@@ -69,21 +79,27 @@ def post_log_file():
 # dictionary that stores info about each solver
 solvers_table = {}
 
+# correlation coefficients
+wwf_coef = 6.51
+wwf2_coef = -0.01
+puzzle_score_offset = 221.89
+time_taken_coef = .5
+num_moves_coef = 6
+
 # object to store info about a solver
 class Solver:
     def __init__(self):
         self.num_solves = 0
         self.ratio = 1
-        self.completedPuzzles = []
-    def update(self, puzzle_score, log_score):
+        self.completed_puzzles = set()
+    def update(self, puzzle_id, puzzle_score, log_score):
+        self.completed_puzzles.add(puzzle_id)
         # weighted average of sqrt'ed ratios, weighting newer ones higher
         new_ratio = math.sqrt(puzzle_score/log_score)
         self.ratio = (self.ratio*self.num_solves + new_ratio)/(self.num_solves + 1)
         self.num_solves += 1
     def get_solver_score(self):
         return self.ratio
-    def add_completed_puzzle(self, puzzle_id):
-        self.completedPuzzles.append(puzzle_id)
 
 ### HELPER FUNCTIONS ###
 
@@ -102,8 +118,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle id: " + str(puzzle_id))
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
-    solver.update(puzzle_score, log_score)
-    solver.add_completed_puzzle(puzzle_id)
+    solver.update(puzzle_id, puzzle_score, log_score)
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
@@ -116,9 +131,10 @@ def get_appropriate_puzzle_id(solver_id):
     #target_puzzle_score = 500
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 500;", (target_puzzle_score,))
     rows = select_from_database(query)
-    #makes sure user doesn't receive already solved puzzle
+    # makes sure user doesn't receive already solved puzzle
     i=0
-    while rows[i][0] in solver.completedPuzzles:
+    while rows[i][0] in solver.completed_puzzles:
+        print("skipping...")
         i = i+1
     return rows[i][0]
 
@@ -126,10 +142,7 @@ def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     rows = select_from_database(query)
     weighted_walk_length = int(rows[0][0])
-    alpha = 6.51
-    beta = -0.01
-    c = 221.89
-    return (alpha * weighted_walk_length) + (beta * weighted_walk_length * weighted_walk_length) + c
+    return (wwf_coef * weighted_walk_length) + (wwf2_coef * weighted_walk_length * weighted_walk_length) + puzzle_score_offset
 
 def get_log_score(log_file):
     moves = log_file.split('\n')
@@ -137,9 +150,7 @@ def get_log_score(log_file):
     first_move = moves[0]
     last_move = moves[-1]
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
-    ceta = .5
-    deta = 6
-    return (ceta * time_taken) + (deta * num_moves)
+    return (time_taken_coef * time_taken) + (num_moves_coef * num_moves)
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
@@ -165,4 +176,13 @@ def select_from_database(query):
 if __name__ == '__main__':
     host = sys.argv[1]
     port = int(sys.argv[2])
-    app.run(host=host, port=port, threaded = True)
+    # restore solvers_table from pickled file
+    solvers_table_file = open("solvers_table.pickle", "w+")
+    try:
+        pickle.load(solvers_table, solvers_table_file)
+    except:
+        pass
+    try:
+        app.run(host=host, port=port, threaded = True)
+    except KeyboardInterrupt:
+        pickle.dump(solvers_table, solvers_table_file)
