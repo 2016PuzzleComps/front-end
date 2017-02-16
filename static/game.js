@@ -70,7 +70,7 @@ function getPuzzle() {
 			puzzleID = resp.puzzle_id;
 			console.log(resp.stats);
             puzzleDiff = resp.stats.puzzle_score;
-            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff
+            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff;
 			gameOver = false;
 			log = "";
 			moveList = [];
