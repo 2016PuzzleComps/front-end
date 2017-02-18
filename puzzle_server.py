@@ -83,8 +83,9 @@ solvers_table = {}
 # ideal score
 ideal_score = 500
 max_score = 1000 # TODO: fine-tune this
-norm_spread = 5 # TODO: fine-tune this
-mle = MLE(max_score, norm_spread)
+norm_spread = 70 # TODO: fine-tune this using mturk data
+angle = 50 # TODO: fine-tune this
+mle = MLE(max_score, norm_spread, angle)
 
 # correlation coefficients
 wwf_coef = 6.51
@@ -126,6 +127,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_id, puzzle_score, log_score)
+    print("new true skill estmate: " + str(solver.get_solver_score()))
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):

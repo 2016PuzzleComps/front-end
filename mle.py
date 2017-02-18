@@ -4,12 +4,13 @@ from scipy.stats import norm
 
 # maximum likelihood estimator
 class MLE:
-    def __init__(self, max_score, norm_spread):
+    def __init__(self, max_score, norm_spread, angle):
         self.norm_spread = norm_spread
         self.max_score = max_score
+        self.angle = angle
 
     def expected_s(self, p, t):
-        return self.max_score/(1 + e**(t-p)) 
+        return self.max_score/(1 + e**((t-p)/self.angle)) 
 
     def conditional_pdf(self, s, p, t):
         loc = self.expected_s(p, t)
@@ -29,8 +30,6 @@ class MLE:
 
 
 if __name__ == '__main__':
-    m = MLE(10, 1)
-    result = m.get_new_true_skill(1, [1], [1])
-    print(result)
-    print(result.x)
-    print(type(result))
+    m = MLE(1000, 70)
+    N = 10
+    result = m.get_new_true_skill(500, [200 for i in range(N)], [500 for i in range(N)])
