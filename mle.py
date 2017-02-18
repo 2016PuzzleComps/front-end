@@ -23,7 +23,9 @@ class MLE:
         return -ret
 
     def get_new_true_skill(self, old_t, solve_scores, puzzle_scores):
-        return minimize(self.function_to_minimize, old_t, args=(self, solve_scores, puzzle_scores), method='Nelder-Mead')
+        result = minimize(self.function_to_minimize, old_t, args=(self, solve_scores, puzzle_scores), method='Nelder-Mead')
+        print(result)
+        return result.x[0]
 
 
 if __name__ == '__main__':
