@@ -12,14 +12,23 @@ class MLE:
         return self.max_score/(1 + e**(t-p)) 
 
     def conditional_pdf(self, s, p, t):
-        loc = expected_s(p, t)
+        loc = self.expected_s(p, t)
         return norm.pdf(s, self.norm_spread, loc)
 
-    def function_to_minimize(self, t, ss, ps):
+    @staticmethod
+    def function_to_minimize(t, mle, ss, ps):
         ret = 1.0
-        for s, p in izip(ss, ps):
-            ret *= conditional_pdf(s, p, t)
+        for s, p in zip(ss, ps):
+            ret *= mle.conditional_pdf(s, p, t)
         return -ret
 
     def get_new_true_skill(self, old_t, solve_scores, puzzle_scores):
-        return minimize(function_to_minimize, old_t, args=[solve_scores, puzzle_scores], method='Nelder-Mead')
+        return minimize(self.function_to_minimize, old_t, args=(self, solve_scores, puzzle_scores), method='Nelder-Mead')
+
+
+if __name__ == '__main__':
+    m = MLE(10, 1)
+    result = m.get_new_true_skill(1, [1], [1])
+    print(result)
+    print(result.x)
+    print(type(result))
