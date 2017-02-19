@@ -82,9 +82,9 @@ solvers_table = {}
 
 # ideal score
 ideal_score = 500
-max_score = 1000 # TODO: fine-tune this
-norm_spread = 70 # TODO: fine-tune this using mturk data
-angle = 50 # TODO: fine-tune this
+max_score = 1259.77 # Highest value in db. wwl=279.1248
+norm_spread = 550 # Average standard deviation of mturk data
+angle = 200 # TODO: fine-tune this
 mle = MLE(max_score, norm_spread, angle)
 
 # correlation coefficients
