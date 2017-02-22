@@ -48,7 +48,7 @@ def get_puzzle_file():
     else:
         puzzle_id = get_appropriate_puzzle_id(solver_id)
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
-        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id)}}
+        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id), 'angle': solvers_table[solver_id].angle}}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -84,8 +84,9 @@ solvers_table = {}
 ideal_score = 500
 max_score = 1259.77 # Highest value in db. wwl=279.1248
 norm_spread = 584.3712 # Average standard deviation of mturk data
-angle = 200 # TODO: fine-tune this
-mle = MLE(max_score, norm_spread, angle)
+#angle = 200 # TODO: fine-tune this
+#mle = MLE(max_score, norm_spread, angle)
+
 
 # correlation coefficients
 wwf_coef = 6.51
@@ -101,11 +102,15 @@ class Solver:
         self.puzzle_scores = []
         self.solve_scores = []
         self.completed_puzzles = set()
+        self.angle = random.choice([60,120,180,240,300])
+        self.mle = MLE(max_score, norm_spread, self.angle)
     def update(self, puzzle_id, puzzle_score, solve_score):
         self.completed_puzzles.add(puzzle_id)
         self.puzzle_scores.append(puzzle_score)
         self.solve_scores.append(solve_score)
-        self.true_skill = mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
+        self.true_skill = self.mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
+        if (len(self.completed_puzzles) % 5 == 0):
+            self.angle = random.choice([60,120,180,240,300])
     def get_solver_score(self):
         return self.true_skill
 
