@@ -67,7 +67,8 @@ def post_log_file():
                 response = {'success': False, 'message': 'No solver_id set!'}
             else:
                 stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
-                response = {'success': True, 'stats': {'log_score': get_log_score(log_file), 'solver_score': solvers_table[solver_id].get_solver_score()}}
+                solver = solvers_table[solver_id]
+                response = {'success': True, 'stats': {'log_score': get_log_score(log_file), 'solver_score': solver.true_skill, 'solver_angle': solver.angle}}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:
@@ -84,7 +85,7 @@ solvers_table = {}
 ideal_score = 500
 max_score = 1259.77 # Highest value in db. wwl=279.1248
 norm_spread = 584.3712 # Average standard deviation of mturk data
-angle = 200 # TODO: fine-tune this
+ideal_angle = 200 # TODO: fine-tune this
 mle = MLE(max_score, norm_spread, angle)
 
 # correlation coefficients
@@ -98,6 +99,7 @@ num_moves_coef = 6
 class Solver:
     def __init__(self):
         self.true_skill = ideal_score
+        self.angle = ideal_angle
         self.puzzle_scores = []
         self.solve_scores = []
         self.completed_puzzles = set()
@@ -105,9 +107,7 @@ class Solver:
         self.completed_puzzles.add(puzzle_id)
         self.puzzle_scores.append(puzzle_score)
         self.solve_scores.append(solve_score)
-        self.true_skill = mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
-    def get_solver_score(self):
-        return self.true_skill
+        self.true_skill, self.angle = mle.update((self.true_skill, self.angle), self.solve_scores, self.puzzle_scores)
 
 ### HELPER FUNCTIONS ###
 
@@ -127,12 +127,12 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
     print("puzzle score: " + str(puzzle_score))
     print("log score: " + str(log_score))
     solver.update(puzzle_id, puzzle_score, log_score)
-    print("new true skill estmate: " + str(solver.get_solver_score()))
+    print("new true skill estmate: " + str(solver.true_skill))
 
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
-    target_puzzle_score = solver.get_solver_score()
+    target_puzzle_score = solver.true_skill
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 500;", (target_puzzle_score,))
     rows = select_from_database(query)
     # makes sure user doesn't receive already solved puzzle
