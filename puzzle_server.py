@@ -68,7 +68,7 @@ def post_log_file():
             else:
                 stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
                 solver = solvers_table[solver_id]
-                response = {'success': True, 'stats': {'log_score': get_log_score(log_file), 'solver_score': solver.true_skill, 'solver_angle': solver.angle}}
+                response = {'success': True, 'stats': {'solve_score': get_solve_score(log_file), 'true_skill': solver.true_skill, 'angle': solver.angle}}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:
@@ -86,7 +86,7 @@ ideal_score = 500
 max_score = 1259.77 # Highest value in db. wwl=279.1248
 norm_spread = 584.3712 # Average standard deviation of mturk data
 ideal_angle = 200 # TODO: fine-tune this
-mle = MLE(max_score, norm_spread, angle)
+mle = MLE(max_score, norm_spread)
 
 # correlation coefficients
 wwf_coef = 6.51
@@ -122,11 +122,11 @@ def create_new_solver_id(request):
 def update_solvers_table(solver_id, puzzle_id, log_file, status):
     solver = solvers_table[solver_id]
     puzzle_score = get_puzzle_score(puzzle_id)
-    log_score = get_log_score(log_file)
+    solve_score = get_solve_score(log_file)
     print("puzzle id: " + str(puzzle_id))
     print("puzzle score: " + str(puzzle_score))
-    print("log score: " + str(log_score))
-    solver.update(puzzle_id, puzzle_score, log_score)
+    print("log score: " + str(solve_score))
+    solver.update(puzzle_id, puzzle_score, solve_score)
     print("new true skill estmate: " + str(solver.true_skill))
 
 # gets id of a good next puzzle for a solver based on their solver score
@@ -148,7 +148,7 @@ def get_puzzle_score(puzzle_id):
     weighted_walk_length = int(rows[0][0])
     return (wwf_coef * weighted_walk_length) + (wwf2_coef * weighted_walk_length * weighted_walk_length) + puzzle_score_offset
 
-def get_log_score(log_file):
+def get_solve_score(log_file):
     moves = log_file.split('\n')
     num_moves = len(moves)
     first_move = moves[0]

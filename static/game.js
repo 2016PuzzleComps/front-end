@@ -8,7 +8,12 @@ var borderColor = '#916f25';
 var boardColor = '#e8d39b';
 
 var puzzleID;
-var puzzleDiff;  // for testing purposes
+var stats = {
+    true_skill: null,
+    puzzle_score: null,
+    solve_score: null,
+    angle: null
+}
 var board;
 var initialBoard = "";
 var log = "";
@@ -27,10 +32,10 @@ function openFinish(title, body) {
 	document.getElementById("finish").style.height = "100%";
 }
 
-function winPage(title, body, stats) {
-    document.getElementById("title").innerHTML = title;
-    document.getElementById("body").innerHTML = body;
-    document.getElementById("stats").innerHTML = stats;
+function winPage() {
+    document.getElementById("title").innerHTML = "Puzzle Complete";
+    document.getElementById("body").innerHTML = "Based on your solve history, we recommend this puzzle";
+    document.getElementById("stats").innerHTML = "Puzzle Difficulty: " + stats.puzzle_score + " | Your Solve Difficulty: " + stats.solve_score;
     document.getElementById("finish").style.height = "100%";
     document.getElementById("nextPuzzle").onclick = nextPuzzle;
 }
@@ -59,6 +64,10 @@ function insertQuitButton() {
 	buttonAdded = true;
 }
 
+function displayStats() {
+    document.getElementById("stats").innerHTML = "Puzzle Difficulty: " + stats.puzzle_score + " | True Skill: " + stats.true_skill + " | Angle: " + stats.angle;
+}
+
 /* SERVER STUFF */
 
 // reset solve history
@@ -85,9 +94,8 @@ function getPuzzle() {
 		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
-			console.log(resp.stats);
-            puzzleDiff = resp.stats.puzzle_score;
-            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff;
+            stats.puzzle_score = resp.stats.puzzle_score;
+            displayStats();
 			gameOver = false;
 			log = "";
 			moveList = [];
@@ -111,8 +119,7 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
-				console.log(resp.stats);
-                winPage("Puzzle Complete", "Based off your last solve, we recommend this puzzle", "Puzzle Difficulty: " + puzzleDiff.toString() + " | Your Solve Difficulty: " +  resp.stats.log_score);
+                winPage();
 			} else {
 				// if they tried to cheat
 				title = "Oops... ";
