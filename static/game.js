@@ -316,6 +316,7 @@ function drawFrame() {
 
 // Loads a board from a given block of text
 function loadBoardFromText(text) {
+    text = text.trim();
 	initialBoard = text;
 	var lines = text.split("\n");
 	var dimen = lines[0].split(" ");
