@@ -48,7 +48,8 @@ def get_puzzle_file():
     else:
         puzzle_id = get_appropriate_puzzle_id(solver_id)
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
-        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id)}}
+        solver = solvers_table[solver_id]
+        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id), 'true_skill': solver.true_skill, 'angle': solver.angle}}
     return json.dumps(response)
 
 # receive new solve log file from client
@@ -68,7 +69,7 @@ def post_log_file():
             else:
                 stats = update_solvers_table(solver_id, puzzle_id, log_file, status)
                 solver = solvers_table[solver_id]
-                response = {'success': True, 'stats': {'solve_score': get_solve_score(log_file), 'true_skill': solver.true_skill, 'angle': solver.angle}}
+                response = {'success': True, 'stats': {'solve_score': get_solve_score(log_file)}}
         else:
             response = {'success': False, 'message': "Invalid solve log! What are you up to..."}
     except json.decoder.JSONDecodeError as e:

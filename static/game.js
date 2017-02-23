@@ -95,6 +95,8 @@ function getPuzzle() {
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
             stats.puzzle_score = resp.stats.puzzle_score;
+            stats.true_skill = resp.stats.true_skill;
+            stats.angle = resp.stats.angle;
             displayStats();
 			gameOver = false;
 			log = "";
@@ -120,9 +122,6 @@ function submitLog(completed) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
                 stats.solve_score = resp.stats.solve_score;
-                stats.true_skill = resp.stats.true_skill;
-                stats.angle = resp.stats.angle;
-                displayStats();
                 winPage();
 			} else {
 				// if they tried to cheat
