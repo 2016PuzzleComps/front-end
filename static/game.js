@@ -91,7 +91,7 @@ function resetSolveHistory() {
 function getPuzzle() {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener('load', function() {
-		resp = JSON.parse(this.responseText);
+		resp = JSON.parse(this.responseText.trim());
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
             stats.puzzle_score = resp.stats.puzzle_score;
