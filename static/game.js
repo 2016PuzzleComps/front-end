@@ -119,6 +119,9 @@ function submitLog(completed) {
 		if(this.status == 200) {
 			var resp = JSON.parse(this.responseText);
 			if(resp.success) {
+                stats.solve_score = resp.stats.solve_score;
+                stats.true_skill = resp.stats.true_skill;
+                stats.angle = resp.stats.angle;
                 winPage();
 			} else {
 				// if they tried to cheat
