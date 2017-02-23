@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     13649,        318]
-NotebookOptionsPosition[     13095,        294]
-NotebookOutlinePosition[     13434,        309]
-CellTagsIndexPosition[     13391,        306]
+NotebookDataLength[      8815,        220]
+NotebookOptionsPosition[      8352,        199]
+NotebookOutlinePosition[      8692,        214]
+CellTagsIndexPosition[      8649,        211]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -22,34 +22,32 @@ Notebook[{
 Cell[CellGroupData[{
 Cell[BoxData[{
  RowBox[{
-  RowBox[{"maxScore", " ", "=", " ", "1000"}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"angle", " ", "=", " ", "100"}], ";"}], "\[IndentingNewLine]", 
+  RowBox[{"maxScore", " ", "=", " ", "1259.77"}], 
+  ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
-   RowBox[{"sigmoid", "[", "x_", "]"}], ":=", 
+   RowBox[{"expectedS", "[", 
+    RowBox[{"t_", ",", "p_", ",", "angle_"}], "]"}], ":=", 
    RowBox[{"maxScore", "/", 
     RowBox[{"(", 
      RowBox[{"1", "+", 
       RowBox[{"Exp", "[", 
-       RowBox[{"-", "x"}], "]"}]}], ")"}]}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"expectedS", "[", 
-    RowBox[{"tp_", ",", "angle_"}], "]"}], ":=", 
-   RowBox[{"sigmoid", "[", 
-    RowBox[{"tp", "/", "angle"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"-", 
+         RowBox[{"(", 
+          RowBox[{"p", "-", "t"}], ")"}]}], "/", "angle"}], "]"}]}], 
+     ")"}]}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{"Manipulate", "[", 
   RowBox[{
    RowBox[{"Plot", "[", 
     RowBox[{
      RowBox[{"expectedS", "[", 
-      RowBox[{"tp", ",", "angle"}], "]"}], ",", 
+      RowBox[{
+       RowBox[{"maxScore", "/", "2"}], ",", "p", ",", "angle"}], "]"}], ",", 
      RowBox[{"{", 
-      RowBox[{"tp", ",", 
-       RowBox[{"-", "500"}], ",", "500"}], "}"}]}], "]"}], ",", 
+      RowBox[{"p", ",", "0", ",", "maxScore"}], "}"}]}], "]"}], ",", 
    RowBox[{"{", 
-    RowBox[{"angle", ",", "1", ",", "100"}], "}"}]}], "]"}]}], "Input",
+    RowBox[{"angle", ",", "1", ",", "300"}], "}"}]}], "]"}]}], "Input",
  CellChangeTimes->{{3.6964428837775507`*^9, 3.6964429748706303`*^9}, {
   3.696443017046574*^9, 3.696443046320877*^9}, {3.69644308132857*^9, 
   3.6964430912485237`*^9}, {3.696443447160549*^9, 3.696443457636533*^9}, {
@@ -57,32 +55,36 @@ Cell[BoxData[{
   3.69644388779704*^9}, {3.69644393597484*^9, 3.6964439597985907`*^9}, {
   3.696443992698904*^9, 3.696443995580552*^9}, {3.6964440296974382`*^9, 
   3.6964440455036*^9}, {3.696444096491959*^9, 3.696444270603344*^9}, {
-  3.696445103004971*^9, 3.6964451065645847`*^9}}],
+  3.696445103004971*^9, 3.6964451065645847`*^9}, {3.696873550492797*^9, 
+  3.696873593189273*^9}, {3.696873634794393*^9, 3.696873636889113*^9}, {
+  3.6968740444690943`*^9, 3.6968740625322638`*^9}, {3.696874197936734*^9, 
+  3.696874258251004*^9}}],
 
 Cell[BoxData[
  TagBox[
   StyleBox[
-   DynamicModuleBox[{$CellContext`angle$$ = 100., Typeset`show$$ = True, 
+   DynamicModuleBox[{$CellContext`angle$$ = 88., Typeset`show$$ = True, 
     Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
     Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
     "\"untitled\"", Typeset`specs$$ = {{
-      Hold[$CellContext`angle$$], 1, 100}}, Typeset`size$$ = {
-    360., {111., 118.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`angle$2325$$ = 0}, 
+      Hold[$CellContext`angle$$], 1, 300}}, Typeset`size$$ = {
+    360., {103., 110.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`angle$10237$$ = 0}, 
     DynamicBox[Manipulate`ManipulateBoxes[
      1, StandardForm, "Variables" :> {$CellContext`angle$$ = 1}, 
       "ControllerVariables" :> {
-        Hold[$CellContext`angle$$, $CellContext`angle$2325$$, 0]}, 
+        Hold[$CellContext`angle$$, $CellContext`angle$10237$$, 0]}, 
       "OtherVariables" :> {
        Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
         Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
         Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
          Typeset`skipInitDone$$}, "Body" :> Plot[
-        $CellContext`expectedS[$CellContext`tp, $CellContext`angle$$], \
-{$CellContext`tp, -500, 500}], 
-      "Specifications" :> {{$CellContext`angle$$, 1, 100}}, "Options" :> {}, 
+        $CellContext`expectedS[$CellContext`maxScore/
+         2, $CellContext`p, $CellContext`angle$$], {$CellContext`p, 
+         0, $CellContext`maxScore}], 
+      "Specifications" :> {{$CellContext`angle$$, 1, 300}}, "Options" :> {}, 
       "DefaultOptions" :> {}],
-     ImageSizeCache->{407., {155., 162.}},
+     ImageSizeCache->{407., {146., 154.}},
      SingleEvaluation->True],
     Deinitialization:>None,
     DynamicModuleValues:>{},
@@ -94,7 +96,9 @@ Cell[BoxData[
    StripOnInput->False],
   Manipulate`InterpretManipulate[1]]], "Output",
  CellChangeTimes->{{3.696444211645276*^9, 3.696444270968546*^9}, 
-   3.6964451079523582`*^9, 3.6965532354609547`*^9}]
+   3.6964451079523582`*^9, 3.696873553620749*^9, {3.696873626595954*^9, 
+   3.696873637289975*^9}, 3.6968740629722137`*^9, {3.696874238855283*^9, 
+   3.6968742586423473`*^9}}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -121,49 +125,47 @@ Cell[BoxData[{
       RowBox[{"s", ",", "p", ",", "t", ",", "angle", ",", "normSpread"}], 
       "]"}], ",", 
      RowBox[{"{", 
-      RowBox[{"s", ",", "0", ",", "maxScore"}], "}"}], ",", 
-     RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}], ",", 
+      RowBox[{"s", ",", "0", ",", "maxScore"}], "}"}]}], "]"}], ",", 
    "\[IndentingNewLine]", 
    RowBox[{"{", 
     RowBox[{"p", ",", "0", ",", "maxScore"}], "}"}], ",", 
    RowBox[{"{", 
     RowBox[{"t", ",", "0", ",", "maxScore"}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"angle", ",", "1", ",", "300"}], "}"}], ",", 
+    RowBox[{"angle", ",", "1", ",", "100"}], "}"}], ",", 
    RowBox[{"{", 
     RowBox[{"normSpread", ",", "50", ",", "100"}], "}"}]}], "]"}]}], "Input",
  CellChangeTimes->{{3.696444323782567*^9, 3.696444334644043*^9}, {
   3.6964447491615047`*^9, 3.696444836963429*^9}, {3.69644487171495*^9, 
   3.696444957537077*^9}, {3.696445043921783*^9, 3.696445172450265*^9}, {
-  3.696445202924369*^9, 3.6964452870438433`*^9}, {3.696554418057315*^9, 
-  3.696554419364202*^9}, {3.696554507853346*^9, 3.69655451652264*^9}, {
-  3.6965550069555283`*^9, 3.69655500765027*^9}}],
+  3.696445202924369*^9, 3.6964452870438433`*^9}, {3.696873677559122*^9, 
+  3.696873678674548*^9}}],
 
 Cell[BoxData[
  TagBox[
   StyleBox[
-   DynamicModuleBox[{$CellContext`angle$$ = 143., $CellContext`normSpread$$ = 
-    65.9, $CellContext`p$$ = 536., $CellContext`t$$ = 514., Typeset`show$$ = 
-    True, Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+   DynamicModuleBox[{$CellContext`angle$$ = 1, $CellContext`normSpread$$ = 
+    74.3, $CellContext`p$$ = 0, $CellContext`t$$ = 0, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
     Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
     "\"untitled\"", Typeset`specs$$ = {{
-      Hold[$CellContext`p$$], 0, 1000}, {
-      Hold[$CellContext`t$$], 0, 1000}, {
-      Hold[$CellContext`angle$$], 1, 300}, {
+      Hold[$CellContext`p$$], 0, 1259.77}, {
+      Hold[$CellContext`t$$], 0, 1259.77}, {
+      Hold[$CellContext`angle$$], 1, 100}, {
       Hold[$CellContext`normSpread$$], 50, 100}}, Typeset`size$$ = {
-    360., {103., 108.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`p$37700$$ = 
-    0, $CellContext`t$37701$$ = 0, $CellContext`angle$37702$$ = 
-    0, $CellContext`normSpread$37703$$ = 0}, 
+    360., {101., 109.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`p$7059$$ = 
+    0, $CellContext`t$7060$$ = 0, $CellContext`angle$7061$$ = 
+    0, $CellContext`normSpread$7062$$ = 0}, 
     DynamicBox[Manipulate`ManipulateBoxes[
      1, StandardForm, 
       "Variables" :> {$CellContext`angle$$ = 1, $CellContext`normSpread$$ = 
         50, $CellContext`p$$ = 0, $CellContext`t$$ = 0}, 
       "ControllerVariables" :> {
-        Hold[$CellContext`p$$, $CellContext`p$37700$$, 0], 
-        Hold[$CellContext`t$$, $CellContext`t$37701$$, 0], 
-        Hold[$CellContext`angle$$, $CellContext`angle$37702$$, 0], 
-        Hold[$CellContext`normSpread$$, $CellContext`normSpread$37703$$, 0]}, 
+        Hold[$CellContext`p$$, $CellContext`p$7059$$, 0], 
+        Hold[$CellContext`t$$, $CellContext`t$7060$$, 0], 
+        Hold[$CellContext`angle$$, $CellContext`angle$7061$$, 0], 
+        Hold[$CellContext`normSpread$$, $CellContext`normSpread$7062$$, 0]}, 
       "OtherVariables" :> {
        Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
         Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
@@ -171,11 +173,12 @@ Cell[BoxData[
          Typeset`skipInitDone$$}, "Body" :> Plot[
         $CellContext`conditionalPdf[$CellContext`s, $CellContext`p$$, \
 $CellContext`t$$, $CellContext`angle$$, $CellContext`normSpread$$], \
-{$CellContext`s, 0, $CellContext`maxScore}, PlotRange -> All], 
-      "Specifications" :> {{$CellContext`p$$, 0, 1000}, {$CellContext`t$$, 0, 
-         1000}, {$CellContext`angle$$, 1, 300}, {$CellContext`normSpread$$, 
-         50, 100}}, "Options" :> {}, "DefaultOptions" :> {}],
-     ImageSizeCache->{407., {182., 189.}},
+{$CellContext`s, 0, $CellContext`maxScore}], 
+      "Specifications" :> {{$CellContext`p$$, 0, 1259.77}, {$CellContext`t$$, 
+         0, 1259.77}, {$CellContext`angle$$, 1, 
+         100}, {$CellContext`normSpread$$, 50, 100}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{407., {183., 191.}},
      SingleEvaluation->True],
     Deinitialization:>None,
     DynamicModuleValues:>{},
@@ -186,114 +189,16 @@ $CellContext`t$$, $CellContext`angle$$, $CellContext`normSpread$$], \
    Deployed->True,
    StripOnInput->False],
   Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{3.696555610982706*^9}]
+ CellChangeTimes->{{3.696445071611992*^9, 3.696445089408743*^9}, {
+   3.696445127134677*^9, 3.696445172691771*^9}, {3.696445210530821*^9, 
+   3.696445287320807*^9}, 3.696873679585908*^9}]
 }, Open  ]],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`angle$$ = 1., $CellContext`normSpread$$ = 
-    73.4, $CellContext`p$$ = 0, $CellContext`t$$ = 0., Typeset`show$$ = True, 
-    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{
-      Hold[$CellContext`p$$], 0, 1000}, {
-      Hold[$CellContext`t$$], 0, 1000}, {
-      Hold[$CellContext`angle$$], 1, 300}, {
-      Hold[$CellContext`normSpread$$], 50, 100}}, Typeset`size$$ = {
-    360., {102., 109.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`p$31181$$ = 
-    0, $CellContext`t$31182$$ = 0, $CellContext`angle$31183$$ = 
-    0, $CellContext`normSpread$31184$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`angle$$ = 1, $CellContext`normSpread$$ = 
-        50, $CellContext`p$$ = 0, $CellContext`t$$ = 0}, 
-      "ControllerVariables" :> {
-        Hold[$CellContext`p$$, $CellContext`p$31181$$, 0], 
-        Hold[$CellContext`t$$, $CellContext`t$31182$$, 0], 
-        Hold[$CellContext`angle$$, $CellContext`angle$31183$$, 0], 
-        Hold[$CellContext`normSpread$$, $CellContext`normSpread$31184$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, "Body" :> Plot[
-        $CellContext`conditionalPdf[$CellContext`s, $CellContext`p$$, \
-$CellContext`t$$, $CellContext`angle$$, $CellContext`normSpread$$], \
-{$CellContext`s, 0, $CellContext`maxScore}, PlotRange -> All], 
-      "Specifications" :> {{$CellContext`p$$, 0, 1000}, {$CellContext`t$$, 0, 
-         1000}, {$CellContext`angle$$, 1, 300}, {$CellContext`normSpread$$, 
-         50, 100}}, "Options" :> {}, "DefaultOptions" :> {}],
-     ImageSizeCache->{407., {203., 210.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Input",
- CellChangeTimes->{3.696555605719475*^9}],
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`angle$$ = 1., $CellContext`normSpread$$ = 
-    73.4, $CellContext`p$$ = 0, $CellContext`t$$ = 0., Typeset`show$$ = True, 
-    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{
-      Hold[$CellContext`p$$], 0, 1000}, {{
-       Hold[$CellContext`t$$], 0.}, 0, 1000}, {{
-       Hold[$CellContext`angle$$], 1.}, 1, 300}, {{
-       Hold[$CellContext`normSpread$$], 73.4}, 50, 100}}, Typeset`size$$ = {
-    360., {102., 109.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`p$37255$$ = 
-    0, $CellContext`t$37256$$ = 0, $CellContext`angle$37257$$ = 
-    0, $CellContext`normSpread$37258$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`angle$$ = 1., $CellContext`normSpread$$ = 
-        73.4, $CellContext`p$$ = 0, $CellContext`t$$ = 0.}, 
-      "ControllerVariables" :> {
-        Hold[$CellContext`p$$, $CellContext`p$37255$$, 0], 
-        Hold[$CellContext`t$$, $CellContext`t$37256$$, 0], 
-        Hold[$CellContext`angle$$, $CellContext`angle$37257$$, 0], 
-        Hold[$CellContext`normSpread$$, $CellContext`normSpread$37258$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, "Body" :> Plot[
-        $CellContext`conditionalPdf[$CellContext`s, $CellContext`p$$, \
-$CellContext`t$$, $CellContext`angle$$, $CellContext`normSpread$$], \
-{$CellContext`s, 0, $CellContext`maxScore}, PlotRange -> All], 
-      "Specifications" :> {{$CellContext`p$$, 0, 
-         1000}, {{$CellContext`t$$, 0.}, 0, 
-         1000}, {{$CellContext`angle$$, 1.}, 1, 
-         300}, {{$CellContext`normSpread$$, 73.4}, 50, 100}}, "Options" :> {},
-       "DefaultOptions" :> {}],
-     ImageSizeCache->{407., {182., 189.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{3.696555606468137*^9}]
-}, Open  ]]
+Cell[BoxData[""], "Input",
+ CellChangeTimes->{{3.696874029975739*^9, 3.69687403122393*^9}}]
 },
-WindowSize->{1916, 1030},
-WindowMargins->{{Automatic, 1}, {1, Automatic}},
+WindowSize->{1916, 1036},
+WindowMargins->{{2, Automatic}, {Automatic, 20}},
 FrontEndVersion->"11.0 for Linux x86 (64-bit) (September 21, 2016)",
 StyleDefinitions->"Default.nb"
 ]
@@ -309,17 +214,14 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 1545, 37, 126, "Input"],
-Cell[2128, 61, 1744, 35, 334, "Output"]
+Cell[580, 22, 1627, 38, 71, "Input"],
+Cell[2210, 62, 1925, 38, 317, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3909, 101, 1587, 38, 102, "Input"],
-Cell[5499, 141, 2497, 47, 421, "Output"]
+Cell[4172, 105, 1440, 36, 92, "Input"],
+Cell[5615, 143, 2627, 50, 391, "Output"]
 }, Open  ]],
-Cell[CellGroupData[{
-Cell[8033, 193, 2489, 47, 430, InheritFromParent],
-Cell[10525, 242, 2554, 49, 388, "Output"]
-}, Open  ]]
+Cell[8257, 196, 91, 1, 30, "Input"]
 }
 ]
 *)
