@@ -35,7 +35,7 @@ function openFinish(title, body) {
 function winPage() {
     document.getElementById("title").innerHTML = "Puzzle Complete";
     document.getElementById("body").innerHTML = "Based on your solve history, we recommend this puzzle";
-    document.getElementById("stats").innerHTML = "Puzzle Difficulty: " + stats.puzzle_score + " | Your Solve Difficulty: " + stats.solve_score;
+    document.getElementById("solveStats").innerHTML = "Puzzle Difficulty: " + stats.puzzle_score + " | Your Solve Difficulty: " + stats.solve_score;
     document.getElementById("finish").style.height = "100%";
     document.getElementById("nextPuzzle").onclick = nextPuzzle;
 }

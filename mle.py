@@ -25,7 +25,6 @@ class MLE:
 
     def update(self, old_x, solve_scores, puzzle_scores):
         result = minimize(self.function_to_minimize, old_x, args=(self, solve_scores, puzzle_scores), method='Nelder-Mead')
-        print(result)
         return result.x
 
 
