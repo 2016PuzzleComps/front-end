@@ -112,6 +112,8 @@ class Solver:
         if (len(self.completed_puzzles) % 5 == 0):
             self.angle = random.choice([60,120,180,240,300])
             #reset things
+            self.puzzle_scores = []
+            self.solve_scores = []
             self.mle = MLE(max_score, norm_spread, self.angle)
             self.true_skill = ideal_score
     def get_solver_score(self):
