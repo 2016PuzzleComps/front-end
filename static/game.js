@@ -122,6 +122,7 @@ function submitLog(completed) {
                 stats.solve_score = resp.stats.solve_score;
                 stats.true_skill = resp.stats.true_skill;
                 stats.angle = resp.stats.angle;
+                displayStats();
                 winPage();
 			} else {
 				// if they tried to cheat
