@@ -112,7 +112,7 @@ class Solver:
         if (len(self.completed_puzzles) % 5 == 0):
             self.angle = random.choice([60,120,180,240,300])
             #reset things
-            self.reset_solve_history()
+            self.mle = MLE(max_score, norm_spread, self.angle)
             self.true_skill = ideal_score
     def get_solver_score(self):
         return self.true_skill
