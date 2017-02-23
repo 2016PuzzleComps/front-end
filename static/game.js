@@ -91,7 +91,7 @@ function resetSolveHistory() {
 function getPuzzle() {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener('load', function() {
-		resp = JSON.parse(this.responseText.trim());
+		resp = JSON.parse(this.responseText);
 		if(resp.success) {
 			puzzleID = resp.puzzle_id;
             stats.puzzle_score = resp.stats.puzzle_score;
@@ -101,7 +101,7 @@ function getPuzzle() {
 			gameOver = false;
 			log = "";
 			moveList = [];
-			loadBoardFromText(resp.puzzle_file);
+			loadBoardFromText(resp.puzzle_file.trim());
 		} else {
 			alert(resp.message);
 		}
