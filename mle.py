@@ -25,7 +25,7 @@ class MLE:
     def function_to_minimize(x, mle, ss, ps):
         t, angle = x
         if angle > MLE.max_angle:
-            return sys.maxint
+            return sys.maxsize
         ret = 1.0
         for s, p in zip(ss, ps):
             ret *= mle.conditional_pdf(s, p, t, angle)
