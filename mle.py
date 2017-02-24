@@ -1,9 +1,12 @@
 from math import e, pi, log
 from scipy.optimize import minimize
 from scipy.stats import norm
+import sys
 
 # maximum likelihood estimator
 class MLE:
+    max_angle = 1000
+
     def __init__(self, max_score, norm_spread):
         self.norm_spread = norm_spread
         self.max_score = max_score
@@ -21,6 +24,8 @@ class MLE:
     @staticmethod
     def function_to_minimize(x, mle, ss, ps):
         t, angle = x
+        if angle > MLE.max_angle:
+            return sys.maxint
         ret = 1.0
         for s, p in zip(ss, ps):
             ret *= mle.conditional_pdf(s, p, t, angle)
@@ -33,7 +38,6 @@ class MLE:
 
 
 if __name__ == '__main__':
-    m = MLE(1000, 70)
-    print(m.expected_p(500, 4663502828760435, 8188733599235806))
+    m = MLE(1259.77, 584.3712)
     N = 10
-    t, angle = m.update((500, 100), [200 for i in range(N)], [500 for i in range(N)])
+    t, angle = m.update((500, 100), [100 for i in range(N)], [600 for i in range(N)])
