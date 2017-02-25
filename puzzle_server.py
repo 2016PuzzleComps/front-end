@@ -48,7 +48,7 @@ def get_puzzle_file():
     else:
         puzzle_id = get_appropriate_puzzle_id(solver_id)
         puzzle_file = get_puzzle_file_from_database(puzzle_id)
-        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id), 'angle': solvers_table[solver_id].angle}}
+        response = {'success': True, 'puzzle_id': puzzle_id, 'puzzle_file': puzzle_file, 'stats': {'puzzle_score': get_puzzle_score(puzzle_id)}}
     return json.dumps(response)
 
 # receive new solve log file from client
