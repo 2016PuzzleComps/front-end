@@ -113,7 +113,6 @@ def solve_log_is_valid(puzzle_file, log_file, status):
             print("empty move notation")
             return False
         move_str_split = move_str.split(' ')
-        print(move_str)
         timestamp = int(move_str_split[0])
         if not timestamp > prev_timestamp:
             print("invalid timestamp")
