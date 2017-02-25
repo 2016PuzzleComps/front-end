@@ -81,19 +81,19 @@ def post_log_file():
 solvers_table = {}
 
 # ideal score
-ideal_score = 700
-max_score = 1259.77 # Highest value in db. wwl=279.1248
-norm_spread = 584.3712 # Average standard deviation of mturk data
+ideal_score = 100
+max_score =  209.438 # Highest value in db. wwl=297.096
+norm_spread = 94.288 # Average standard deviation of mturk data
 angle = 300
 mle = MLE(max_score, norm_spread, angle)
 
 
 # correlation coefficients
-wwf_coef = 6.51
-wwf2_coef = -0.01
-puzzle_score_offset = 221.89
-time_taken_coef = .5
-num_moves_coef = 6
+wwf_coef = .531
+#wwf2_coef = -0.01
+puzzle_score_offset = 51.68
+#time_taken_coef = .5
+#num_moves_coef = 6
 
 # object to store info about a solver
 class Solver:
@@ -135,7 +135,7 @@ def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
     target_puzzle_score = mle.expected_p(ideal_score, solver.get_solver_score())
     print("target_puzzle_score: " + str(target_puzzle_score))
-    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT %s;", (target_puzzle_score, len(solver.completed_puzzles)+1))
+    query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS((.531*weighted_walk_length) + 51.68 - %s) LIMIT %s;", (target_puzzle_score, len(solver.completed_puzzles)+1))
     rows = select_from_database(query)
     # makes sure user doesn't receive already solved puzzle
     i=0
@@ -148,7 +148,7 @@ def get_puzzle_score(puzzle_id):
     query = ("SELECT weighted_walk_length FROM puzzles WHERE puzzle_id = '%s';", (puzzle_id,))
     rows = select_from_database(query)
     weighted_walk_length = int(rows[0][0])
-    return (wwf_coef * weighted_walk_length) + (wwf2_coef * weighted_walk_length * weighted_walk_length) + puzzle_score_offset
+    return (wwf_coef * weighted_walk_length) + puzzle_score_offset
 
 def get_log_score(log_file):
     moves = log_file.split('\n')
@@ -156,7 +156,7 @@ def get_log_score(log_file):
     first_move = moves[0]
     last_move = moves[-1]
     time_taken = (int(last_move.split(' ')[0]) - int(first_move.split(' ')[0]))/1000
-    return (time_taken_coef * time_taken) + (num_moves_coef * num_moves)
+    return num_moves
 
 # load puzzle file from db given its ID
 def get_puzzle_file_from_database(puzzle_id):
