@@ -59,7 +59,7 @@ def post_log_file():
         status = request_json['status']
         log_file = request_json['log_file'].strip()
         puzzle_id = request_json['puzzle_id']
-        puzzle_file = get_puzzle_file_from_database(puzzle_id)
+        puzzle_file = get_puzzle_file_from_database(puzzle_id).strip()
         # see if the log is valid in light of whether or not they purport to have solved it
         if solve_log_is_valid(puzzle_file, log_file, status):
             solver_id = request.cookies.get('solver_id')
