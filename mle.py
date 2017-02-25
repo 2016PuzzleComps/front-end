@@ -1,4 +1,4 @@
-from math import e, pi
+from math import e, pi, log
 from scipy.optimize import minimize
 from scipy.stats import norm
 
