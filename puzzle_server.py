@@ -84,8 +84,8 @@ solvers_table = {}
 ideal_score = 500
 max_score = 1259.77 # Highest value in db. wwl=279.1248
 norm_spread = 584.3712 # Average standard deviation of mturk data
-#angle = 200 # TODO: fine-tune this
-#mle = MLE(max_score, norm_spread, angle)
+angle = 300
+mle = MLE(max_score, norm_spread, angle)
 
 
 # correlation coefficients
@@ -102,20 +102,11 @@ class Solver:
         self.puzzle_scores = []
         self.solve_scores = []
         self.completed_puzzles = set()
-        self.angle = random.choice([60,120,180,240,300])
-        self.mle = MLE(max_score, norm_spread, self.angle)
     def update(self, puzzle_id, puzzle_score, solve_score):
         self.completed_puzzles.add(puzzle_id)
         self.puzzle_scores.append(puzzle_score)
         self.solve_scores.append(solve_score)
-        self.true_skill = self.mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
-        if (len(self.completed_puzzles) % 5 == 0):
-            self.angle = random.choice([60,120,180,240,300])
-            #reset things
-            self.puzzle_scores = []
-            self.solve_scores = []
-            self.mle = MLE(max_score, norm_spread, self.angle)
-            self.true_skill = ideal_score
+        self.true_skill = mle.get_new_true_skill(self.true_skill, self.solve_scores, self.puzzle_scores)
     def get_solver_score(self):
         return self.true_skill
 
@@ -142,7 +133,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
 # gets id of a good next puzzle for a solver based on their solver score
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
-    target_puzzle_score = solver.get_solver_score()
+    target_puzzle_score = mle.expected_p(ideal_score, solver.get_solver_score())
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 500;", (target_puzzle_score,))
     rows = select_from_database(query)
     # makes sure user doesn't receive already solved puzzle

@@ -12,6 +12,9 @@ class MLE:
     def expected_s(self, p, t):
         return self.max_score/(1 + e**((t-p)/self.angle)) 
 
+    def expected_p(self, s, t):
+        return t - self.angle * log(self.max_score/s - 1)
+
     def conditional_pdf(self, s, p, t):
         loc = self.expected_s(p, t)
         return norm.pdf(s, self.norm_spread, loc)
