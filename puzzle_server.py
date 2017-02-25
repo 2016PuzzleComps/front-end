@@ -134,6 +134,7 @@ def update_solvers_table(solver_id, puzzle_id, log_file, status):
 def get_appropriate_puzzle_id(solver_id):
     solver = solvers_table[solver_id]
     target_puzzle_score = mle.expected_p(ideal_score, solver.get_solver_score())
+    print("target_puzzle_score: " + str(target_puzzle_score))
     query = ("SELECT puzzle_id FROM puzzles ORDER BY ABS(((6.51*weighted_walk_length) - (0.01*(weighted_walk_length^2)) + 221.89) - %s) LIMIT 500;", (target_puzzle_score,))
     rows = select_from_database(query)
     # makes sure user doesn't receive already solved puzzle

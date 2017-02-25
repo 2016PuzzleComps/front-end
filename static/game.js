@@ -87,8 +87,7 @@ function getPuzzle() {
 			puzzleID = resp.puzzle_id;
 			console.log(resp.stats);
             puzzleDiff = resp.stats.puzzle_score;
-            angle = resp.stats.angle;
-            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff + " Angle: " + angle; 
+            document.getElementById("puzzleDiff").innerHTML = "Puzzle Difficulty: " + puzzleDiff; 
 			gameOver = false;
 			log = "";
 			moveList = [];
