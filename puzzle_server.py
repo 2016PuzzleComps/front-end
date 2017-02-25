@@ -81,10 +81,10 @@ def post_log_file():
 solvers_table = {}
 
 # ideal score
-ideal_score = 100
+ideal_score = 90
 max_score =  209.438 # Highest value in db. wwl=297.096
 norm_spread = 94.288 # Average standard deviation of mturk data
-angle = 300
+angle = 52.25
 mle = MLE(max_score, norm_spread, angle)
 
 
