@@ -81,7 +81,7 @@ def post_log_file():
 solvers_table = {}
 
 # ideal score
-ideal_score = 500
+ideal_score = 700
 max_score = 1259.77 # Highest value in db. wwl=279.1248
 norm_spread = 584.3712 # Average standard deviation of mturk data
 angle = 300
